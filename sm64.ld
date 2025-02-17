@@ -230,7 +230,7 @@ SECTIONS
 #undef JP_PADDING_TEXT
 #endif
 
-#ifdef VERSION_CN
+#ifndef __sgi
         BUILD_DIR/libgcc.a:_divdi3.o(.text);
         BUILD_DIR/libgcc.a:_moddi3.o(.text);
         BUILD_DIR/libgcc.a:_udivdi3.o(.text);
@@ -390,7 +390,7 @@ SECTIONS
         #include "lib/ultra/ld.inc"
 #undef SECTION
 
-#ifdef VERSION_CN
+#ifndef __sgi
         BUILD_DIR/libgcc.a:_divdi3.o(.rodata*);
         BUILD_DIR/libgcc.a:_moddi3.o(.rodata*);
         BUILD_DIR/libgcc.a:_udivdi3.o(.rodata*);

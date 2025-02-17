@@ -49,7 +49,7 @@ endif
 # LIBGULTRA - whenever to compile libultra using IDO or GNU
 #   1 - uses egcs to match iQue (uses gcc if COMPILER is gcc)
 #   0 - uses ido, used to match JP, US, EU and Shindou
-LIBGULTRA ?= 0
+LIBGULTRA ?= 1
 $(eval $(call validate-option,LIBGULTRA,0 1))
 
 ULTRA_C_FILES := $(foreach dir,$(ULTRA_SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -83,7 +83,7 @@ ULTRA_CFLAGS  = -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -G 0 -signed 
 ULTRA_ASFLAGS = -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -G 0 -nostdinc -o32 -c
 
 GULTRA_CC     := COMPILER_PATH=$(EGCS_PATH) $(EGCS_PATH)/gcc
-GULTRA_CFLAGS  = -mcpu=r4300 -fno-pic -Wa,--strip-local-absolute -G 0
+GULTRA_CFLAGS  = -mcpu=r4300 -fno-pic -Wa,--strip-local-absolute -G 0 -fno-common
 GULTRA_ASFLAGS = -mcpu=r4300 -fno-pic -x assembler-with-cpp -c -DEGCS_GCC
 
 ifeq ($(LIBGULTRA),1)

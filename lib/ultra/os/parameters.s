@@ -31,21 +31,4 @@ ABS(__osBbPakBindings, 0x80000394)
 ABS(__osBbStateName, 0x800003a4)
 ABS(__osBbStateDirty, 0x800003b4)
 ABS(__osBbAuxDataLimit, 0x800003b8)
-
-/* padding */
-.fill 0x64
-#else
-/* padding */
-/* JP is the only version without padding even though 2.0D has it (US) */
-#if (LIBULTRA_VERSION > OS_VER_D) || (LIBULTRA_VERSION == OS_VER_D && LIBULTRA_REVISION >= 1)
-.repeat 0x34
-.byte 0
-.endr
-#endif
-#if LIBULTRA_VERSION >= OS_VER_H
-.repeat 0x20
-.byte 0
-.endr
-#endif
-
 #endif
