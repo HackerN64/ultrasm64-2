@@ -237,9 +237,7 @@ LEVEL_DIRS     := $(patsubst levels/%,%,$(dir $(wildcard levels/*/header.h)))
 SRC_DIRS := src src/engine src/game src/menu src/buffers src/audio $(AUDIO_SRC_DIR) actors levels bin data assets asm lib sound
 BIN_DIRS := bin bin/$(VERSION)
 
-ifeq ($(VERSION),cn)
-  LIBGCC_SRC_DIRS += lib/src/libgcc
-endif
+LIBGCC_SRC_DIRS += lib/src/libgcc
 
 GODDARD_SRC_DIRS := src/goddard src/goddard/dynlists
 
@@ -396,6 +394,7 @@ else
 endif
 
 ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
+ASMFLAGS := -G 0 $(DEF_INC_CFLAGS) -w -nostdinc -c -march=vr4300 -mfix4300 -mno-abicalls -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_MIPS_SZLONG=32
 RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
 
 ifeq ($(shell getconf LONG_BIT), 32)
@@ -765,7 +764,11 @@ endif
 # Assemble assembly code
 $(BUILD_DIR)/%.o: %.s
 	$(call print,Assembling:,$<,$@)
-	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY=1 $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
+ifeq ($(COMPILER),gcc)
+	$(V)$(CC) -c $(ASMFLAGS) -x assembler-with-cpp -MMD -MF $(BUILD_DIR)/$*.d -o $@ $<
+else
+	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY  $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
+endif
 
 # Assemble RSP assembly code
 $(BUILD_DIR)/rsp/%.bin $(BUILD_DIR)/rsp/%_data.bin: rsp/%.s
