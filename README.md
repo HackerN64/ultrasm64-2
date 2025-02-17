@@ -1,23 +1,11 @@
 # Super Mario 64
 
-- This repo contains a full decompilation of Super Mario 64 of the following releases: Japan (jp), North America (us), Europe (eu), Shindou (sh) and iQue Player (cn).
-- Naming and documentation of the source code and data structures are in progress.
-
-It builds the following ROMs:
-
-* sm64.jp.z64 `sha1: 8a20a5c83d6ceb0f0506cfc9fa20d8f438cafe51`
-* sm64.us.z64 `sha1: 9bef1128717f958171a4afac3ed78ee2bb4e86ce`
-* sm64.eu.z64 `sha1: 4ac5721683d0e0b6bbb561b58a71740845dceea9`
-* sm64.sh.z64 `sha1: 3f319ae697533a255a1003d09202379d78d5a2e0`
-* sm64.cn.z64 `sha1: 2e1db2780985a1f068077dc0444b685f39cd90ec`
-
-This repo does not include all assets necessary for compiling the ROMs.
-A prior copy of the game is required to extract the assets.
+This repository is a clean slate for basic enhancements built upon the *Super Mario 64* decompilation. It is a spritual successor to CrashOveride95's *UltraSM64*.
 
 ## Quick Start (for Ubuntu)
 
 1. Install prerequisites: `sudo apt install -y binutils-mips-linux-gnu build-essential git pkgconf python3`
-2. Clone the repo from within Linux: `git clone https://github.com/n64decomp/sm64.git`
+2. Clone the repo from within Linux: `git clone https://github.com/HackerN64/ultrasm64-2.git`
 3. Place a Super Mario 64 ROM called `baserom.<VERSION>.z64` into the project folder for asset extraction, where `VERSION` can be `jp`, `us`, `eu`, `sh`, or `cn`.
 4. Run `make` to build. Specify the version through `make VERSION=<VERSION>`. Add `-j4` to improve build speed (hardware dependent).
 
@@ -33,7 +21,7 @@ We recommend either Debian or Ubuntu 18.04 Linux distributions under WSL.
 Note: WSL1 does not currently support Ubuntu 20.04.
 
 Next, clone the SM64 repo from within the Linux shell:
-`git clone https://github.com/n64decomp/sm64.git`
+`git clone https://github.com/HackerN64/ultrasm64-2.git`
 
 Then continue following the directions in the [Linux](#linux) installation section below.
 
@@ -189,4 +177,4 @@ discuss what you would like to change.
 
 Run `clang-format` on your code to ensure it meets the project's coding standards.
 
-Official Discord: [discord.gg/DuYH3Fh](https://discord.gg/DuYH3Fh)
+Official Discord: https://discord.gg/brETAakcXr
