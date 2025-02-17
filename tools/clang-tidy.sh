@@ -28,7 +28,7 @@ echo "Tidying all C files for all versions. This will take a bit"
 for VER in ${VERSIONS}; do  
         echo "Tidying for compiler version flag ${VER}"
         # Don't run clang-tidy on behaviors
-        clang-tidy ${TIDY_OPTS} src/audio/*.c -- ${COMPILER_OPTS} ${VER}
+        clang-tidy ${TIDY_OPTS} src/audio/*.c src/audio/*/*.c -- ${COMPILER_OPTS} ${VER}
         clang-tidy ${TIDY_OPTS} src/engine/*.c -- ${COMPILER_OPTS} ${VER}
         clang-tidy ${TIDY_OPTS} src/game/*.c -- ${COMPILER_OPTS} ${VER}
         clang-tidy ${TIDY_OPTS} src/goddard/*.c -- ${COMPILER_OPTS} ${VER}

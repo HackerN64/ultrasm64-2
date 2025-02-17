@@ -41,6 +41,9 @@ extern u8 *gGfxPoolEnd;
 extern struct GfxPool *gGfxPool;
 extern u8 gControllerBits;
 extern s8 gEepromProbe;
+extern struct DmaHandlerList gMarioAnimsBuf;
+extern struct DmaHandlerList gDemoInputsBuf;
+extern UNUSED u8 sfillerGameInit[0x90];
 
 extern void (*gGoddardVblankCallback)(void);
 extern struct Controller *gPlayer1Controller;

@@ -57,6 +57,12 @@ typedef s8 RoomData; // Rooms are limited to -128 to 127. Change the type if you
 typedef Collision TerrainData;
 typedef TerrainData Vec3Terrain[3];
 
+#define M_GFXTASK 1
+#define M_AUDTASK 2
+#define M_VIDTASK 3
+#define M_HVQTASK 6
+#define M_HVQMTASK 7
+
 enum SpTaskState {
     SPTASK_STATE_NOT_STARTED,
     SPTASK_STATE_RUNNING,

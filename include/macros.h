@@ -1,16 +1,26 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+// Check for egcs compiler
+#if defined (__GNUC__) && (__GNUC__ == 2) && (__GNUC_MINOR__ == 91)
+#define EGCS_GCC
+#endif
+
+#ifndef _LANGUAGE_ASSEMBLY
 #include "platform_info.h"
+
+// Since we are using both compilers to match iQue, ignore these errors.
+#ifndef EGCS_GCC
 
 #ifndef __sgi
 #define GLOBAL_ASM(...)
 #endif
 
 #if !defined(__sgi) && (!defined(NON_MATCHING) || !defined(AVOID_UB))
-// asm-process isn't supported outside of IDO, and undefined behavior causes
-// crashes.
+// asm-process isn't supported outside of IDO, and undefined behavior causes crashes.
 #error Matching build is only possible on IDO; please build with NON_MATCHING=1.
+#endif
+
 #endif
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
@@ -46,14 +56,14 @@
 #endif
 
 // Align to 8-byte boundary for DMA requirements
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(EGCS_GCC)
 #define ALIGNED8 __attribute__((aligned(8)))
 #else
 #define ALIGNED8
 #endif
 
 // Align to 16-byte boundary for audio lib requirements
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(EGCS_GCC)
 #define ALIGNED16 __attribute__((aligned(16)))
 #else
 #define ALIGNED16
@@ -86,6 +96,8 @@
 #define FORCE_BSS __attribute__((nocommon)) __attribute__((section (".bss_cn")))
 #else
 #define FORCE_BSS
+#endif
+
 #endif
 
 #endif // MACROS_H

@@ -426,7 +426,7 @@ void thread1_idle(UNUSED void *arg) {
 
     osCreateViManager(OS_PRIORITY_VIMGR);
 #if defined(VERSION_US) || defined(VERSION_SH) || defined(VERSION_CN)
-    if (sp24 == TV_TYPE_NTSC) {
+    if (sp24 == OS_TV_NTSC) {
         osViSetMode(&osViModeTable[OS_VI_NTSC_LAN1]);
     } else {
         osViSetMode(&osViModeTable[OS_VI_PAL_LAN1]);

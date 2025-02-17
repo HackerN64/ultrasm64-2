@@ -1,6 +1,5 @@
 #include <PR/ultratypes.h>
 
-#include "prevent_bss_reordering.h"
 #include "sm64.h"
 #include "area.h"
 #include "audio/external.h"
@@ -15,7 +14,6 @@
 #include "gfx_dimensions.h"
 #include "ingame_menu.h"
 #include "interaction.h"
-#include "level_table.h"
 #include "level_update.h"
 #include "mario.h"
 #include "mario_actions_cutscene.h"
@@ -29,15 +27,6 @@
 #include "sound_init.h"
 #include "rumble_init.h"
 
-static struct Object *sIntroWarpPipeObj;
-static struct Object *sEndPeachObj;
-static struct Object *sEndRightToadObj;
-static struct Object *sEndLeftToadObj;
-static struct Object *sEndJumboStarObj;
-static UNUSED s32 sUnused;
-static s16 sEndPeachAnimation;
-static s16 sEndToadAnims[2];
-
 static Vp sEndCutsceneVp = { { { 640, 480, 511, 0 }, { 640, 480, 511, 0 } } };
 static struct CreditsEntry *sDispCreditsEntry = NULL;
 
@@ -47,6 +36,15 @@ static s8 D_8032CBE8 = 0;
 static s8 D_8032CBEC[7] = { 2, 3, 2, 1, 2, 3, 2 };
 
 static u8 sStarsNeededForDialog[] = { 1, 3, 8, 30, 50, 70 };
+
+struct Object *sIntroWarpPipeObj;
+struct Object *sEndPeachObj;
+struct Object *sEndRightToadObj;
+struct Object *sEndLeftToadObj;
+struct Object *sEndJumboStarObj;
+struct Object *sEndUnusedObj;
+s16 sEndPeachAnimation;
+s16 sEndToadAnims[2];
 
 /**
  * Data for the jumbo star cutscene. It specifies the flight path after triple

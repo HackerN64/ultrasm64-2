@@ -1,6 +1,5 @@
 #include <PR/ultratypes.h>
 
-#include "prevent_bss_reordering.h"
 #include "area.h"
 #include "sm64.h"
 #include "gfx_dimensions.h"
@@ -22,6 +21,8 @@
 #include "save_file.h"
 #include "level_table.h"
 #include "dialog_ids.h"
+
+#include <prevent_bss_reordering.h>
 
 struct SpawnInfo gPlayerSpawnInfos[1];
 struct GraphNode *D_8033A160[0x100];

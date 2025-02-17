@@ -84,20 +84,20 @@ struct Area {
 
 FORCE_BSS struct HudDisplay gHudDisplay;
 FORCE_BSS OSThread __osThreadSave;
-FORCE_BSS OSPifRam __osContPifRam;
+FORCE_BSS ALIGNED16 OSPifRam __osContPifRam;
 FORCE_BSS OSPiHandle __Dom2SpeedParam;
 FORCE_BSS struct SpawnInfo gPlayerSpawnInfos[1];
 FORCE_BSS struct GraphNode *D_8033A160[0x100];
 FORCE_BSS OSPiHandle __CartRomHandle;
 FORCE_BSS u8 sBssPad[0x48]; //! TODO: What is this space in the bss?
-FORCE_BSS OSMesgQueue gOsPiMessageQueue;
+FORCE_BSS ALIGNED8 OSMesgQueue __osPiAccessQueue;
 FORCE_BSS OSPiHandle __Dom1SpeedParam;
 FORCE_BSS OSTimer __osBaseTimer;
 FORCE_BSS struct WarpTransition gWarpTransition;
 FORCE_BSS OSTimer __osEepromTimer;
 FORCE_BSS struct MarioState gMarioStates[1];
 FORCE_BSS __OSEventState __osEventStateTab[OS_NUM_EVENTS];
-FORCE_BSS OSMesgQueue __osEepromTimerQ;
+FORCE_BSS ALIGNED8 OSMesgQueue __osEepromTimerQ;
 FORCE_BSS struct Area gAreaData[8];
-FORCE_BSS OSMesgQueue gOsSiMessageQueue;
+FORCE_BSS ALIGNED8 OSMesgQueue __osSiAccessQueue;
 #endif

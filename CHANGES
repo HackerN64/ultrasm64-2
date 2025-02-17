@@ -1,3 +1,11 @@
+Refresh 16.5 (Another two years later...)
+
+1.) Fix build with make-4.4. (#1218)
+2.) Split src/audio/ into separate directories per version (#1219)
+3.) Remove unused string defines for PAL (#1216)
+4.) Update armips.cpp (#1217)
+5.) Libultra and OS related assembly cleanup, compiler improvements and more (#1210)
+
 Refresh 16 (Two years later...)
 1.) remove capstone from readme, slight update (#1212)
 2.) Update ido static recomp (#1211)

@@ -21,7 +21,7 @@
 
 #ifndef USE_EXT_RAM /* Default: Runs out of memory quickly when importing custom assets. */
 
-#define RDRAM_END         0x80400000
+#define SEG_RAM_END           0x80400000
 
 #define SEG_POOL_START    SEG_START
 #define SEG_POOL_SIZE     0x165000
@@ -35,7 +35,7 @@
 #define SEG_ENGINE        0x80378800
 #endif
 
-#define SEG_FRAMEBUFFERS  (RDRAM_END - SEG_FRAMEBUFFERS_SIZE)
+#define SEG_FRAMEBUFFERS  (SEG_RAM_END - SEG_FRAMEBUFFERS_SIZE)
 
 #else /* Use Expansion Pak space for pool. */
 
@@ -45,16 +45,16 @@
  */
 
 #ifdef VERSION_CN
-#define RDRAM_END         0x807C0000 // iQue has stuff like EEPROM mapped at 807C0000 onwards. TODO: Code this using osMemSize
+#define SEG_RAM_END         0x807C0000 // iQue has stuff like EEPROM mapped at 807C0000 onwards. TODO: Code this using osMemSize
 #else
-#define RDRAM_END         0x80800000
+#define SEG_RAM_END         0x80800000
 #endif
 
 #define SEG_BUFFERS       SEG_START
 #define SEG_ENGINE        ((u32) &_engineSegmentStart)
 #define SEG_FRAMEBUFFERS  ((u32) &_framebuffersSegmentNoloadStart)
 #define SEG_POOL_START    ((u32) &_framebuffersSegmentNoloadEnd)
-#define SEG_POOL_END      RDRAM_END
+#define SEG_POOL_END      SEG_RAM_END
 #define SEG_POOL_END_4MB  0x80400000 // For the error message screen enhancement.
 
 #endif

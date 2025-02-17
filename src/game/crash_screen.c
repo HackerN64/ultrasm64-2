@@ -5,8 +5,8 @@
 #include "sm64.h"
 
 #if defined(TARGET_N64) && (defined(VERSION_EU) || defined(VERSION_SH) || defined(VERSION_CN))
-
-#include "lib/src/printf.h"
+#include "PR/os_internal.h"
+#include "lib/ultra/libc/xstdio.h"
 
 u8 gCrashScreenCharToGlyph[128] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

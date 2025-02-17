@@ -33,6 +33,8 @@
 #include "sound_init.h"
 #include "rumble_init.h"
 
+typedef int bss_reordering_fix;
+
 u32 unused80339F10;
 u8 unused80339F1C[20];
 

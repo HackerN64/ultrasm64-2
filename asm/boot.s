@@ -3,12 +3,21 @@
 .set noreorder // don't insert nops after branches
 
 #include "macros.inc"
+#include <PR/rcp.h>
 
-.equ EXCEPTION_TLB_MISS, 0x80000000
-.equ SP_DMEM,            0xA4000000
-.equ SP_IMEM,            0xA4001000
-.equ MI_MODE_REG,        0xA4300000
-.equ RI_MODE_REG,        0xA4700000
+#define PHYS_TO_CART(addr) ((addr) | 0xB0000000)
+.equ CART_ENTRYPOINT, 0x00000008
+.equ CART_CHECKSUM0, 0x00000010
+.equ CART_CHECKSUM1, 0x00000014
+
+// initial DMEM state
+.equ SP_DMEM_UNK0, 0x040004C0
+.equ SP_DMEM_UNK1, 0x04000774
+
+// This value must fit in one instruction
+//  - Either use the top 16 bits or the low 16 bits, but not both
+.equ INITIAL_DMA_LEN, (0x00100000 - 1)
+.equ INITIAL_DMA_ROMPOS, 0x1000
 
 #ifdef VERSION_CN
 .macro cn_li a b
@@ -24,43 +33,42 @@
 // 0xA0000000-0xBFFFFFFF: KSEG1 direct map non-cache mirror of 0x00000000
 // 0xA4000000-0xA4000FFF: RSP DMEM
 
-// 0xA4000000-0xA400003F: ROM header
-
 .section .text, "ax"
 
 // 0xA4000040-0xA4000B6F: IPL3
 
 // IPL3 entry point jumped to from IPL2
 glabel ipl3_entry // 0xA4000040
-    mtc0  $zero, $13
-    mtc0  $zero, $9
-    mtc0  $zero, $11
-    cn_li $t0, RI_MODE_REG
-    lw    $t1, 0xc($t0)
+.ent ipl3_entry
+    mtc0  $zero, C0_CAUSE
+    mtc0  $zero, C0_COUNT
+    mtc0  $zero, C0_COMPARE
+    cn_li $t0, PHYS_TO_K1(RI_BASE_REG)
+    lw    $t1, %lo(RI_SELECT_REG)($t0)
     bnez  $t1, .LA4000410
-     nop
+    nop
     addiu $sp, $sp, -0x18
     sw    $s3, ($sp)
     sw    $s4, 4($sp)
     sw    $s5, 8($sp)
     sw    $s6, 0xc($sp)
     sw    $s7, 0x10($sp)
-    cn_li $t0, RI_MODE_REG
-    lui   $t2, (0xa3f80000 >> 16)
-    lui   $t3, (0xa3f00000 >> 16)
-    cn_li $t4, MI_MODE_REG
+    cn_li $t0, PHYS_TO_K1(RI_BASE_REG)
+    lui   $t2, %hi(PHYS_TO_K1(RDRAM_BASE_REG + 0x80000))
+    lui   $t3, %hi(PHYS_TO_K1(RDRAM_BASE_REG))
+    cn_li $t4, PHYS_TO_K1(MI_BASE_REG)
     ori   $t1, $zero, 64
-    sw    $t1, 4($t0)
+    sw    $t1, %lo(MI_VERSION_REG)($t0)
     li    $s1, 8000
 .LA400009C:
     nop
     addi  $s1, $s1, -1
     bnez  $s1, .LA400009C
      nop
-    sw    $zero, 8($t0)
-    ori   $t1, $zero, 20
-    sw    $t1, 0xc($t0)
-    sw    $zero, ($t0)
+    sw    $zero, %lo(RI_CURRENT_LOAD_REG)($t0)
+    ori   $t1, $zero, 0x14
+    sw    $t1, %lo(RI_SELECT_REG)($t0)
+    sw    $zero, %lo(RI_MODE_REG)($t0)
     li    $s1, 4
 .LA40000C0:
     nop
@@ -68,34 +76,34 @@ glabel ipl3_entry // 0xA4000040
     bnez  $s1, .LA40000C0
      nop
     ori   $t1, $zero, 14
-    sw    $t1, ($t0)
+    sw    $t1, %lo(RI_MODE_REG)($t0)
     li    $s1, 32
 .LA40000DC:
     addi  $s1, $s1, -1
     bnez  $s1, .LA40000DC
-    ori   $t1, $zero, 271
-    sw    $t1, ($t4)
+    ori   $t1, $zero, (MI_SET_INIT | 0xF)
+    sw    $t1, %lo(MI_MODE_REG)($t4)
     lui   $t1, (0x18082838 >> 16)
     ori   $t1, (0x18082838 & 0xFFFF)
-    sw    $t1, 0x8($t2)
-    sw    $zero, 0x14($t2)
+    sw    $t1, %lo(RDRAM_DELAY_REG)($t2)
+    sw    $zero, %lo(RDRAM_REF_ROW_REG)($t2)
     lui   $t1, 0x8000
-    sw    $t1, 0x4($t2)
+    sw    $t1, %lo(RDRAM_DEVICE_ID_REG)($t2)
     move  $t5, $zero
     move  $t6, $zero
-    lui   $t7, (0xA3F00000 >> 16)
+    lui   $t7, %hi(PHYS_TO_K1(RDRAM_BASE_REG))
     move $t8, $zero
-    lui   $t9, (0xA3F00000 >> 16)
+    lui   $t9, %hi(PHYS_TO_K1(RDRAM_BASE_REG))
     lui   $s6, (0xA0000000 >> 16)
     move $s7, $zero
-    lui   $a2, (0xA3F00000 >> 16)
+    lui   $a2, %hi(PHYS_TO_K1(RDRAM_BASE_REG))
     lui   $a3, (0xA0000000 >> 16)
     move $s2, $zero
     lui   $s4, (0xA0000000 >> 16)
     addiu $sp, $sp, -0x48
     move $fp, $sp
-    lui   $s0, %hi(MI_VERSION_REG)
-    lw    $s0, %lo(MI_VERSION_REG)($s0)
+    lui   $s0, %hi(PHYS_TO_K1(MI_VERSION_REG))
+    lw    $s0, %lo(PHYS_TO_K1(MI_VERSION_REG))($s0)
     cn_li $s1, 0x01010101
     bne   $s0, $s1, .LA4000160
      nop
@@ -115,14 +123,14 @@ glabel ipl3_entry // 0xA4000040
      nop
     sw    $v0, ($sp)
     li    $t1, 8192
-    sw    $t1, ($t4)
-    lw    $t3, ($t7)
+    sw    $t1, %lo(MI_MODE_REG)($t4)
+    lw    $t3, %lo(RDRAM_CONFIG_REG)($t7)
     lui   $t0, 0xf0ff
     and   $t3, $t3, $t0
     sw    $t3, 4($sp)
     addi  $sp, $sp, 8
     li    $t1, 4096
-    sw    $t1, ($t4)
+    sw    $t1, %lo(MI_MODE_REG)($t4)
     lui   $t0, 0xb019
     bne   $t3, $t0, .LA40001E0
      nop
@@ -142,11 +150,11 @@ glabel ipl3_entry // 0xA4000040
     add   $s4, $s4, $t0
 .LA40001E8:
     li    $t0, 8192
-    sw    $t0, ($t4)
-    lw    $t1, 0x24($t7)
-    lw    $k0, ($t7)
+    sw    $t0, %lo(MI_MODE_REG)($t4)
+    lw    $t1, %lo(RDRAM_DEVICE_MANUF_REG)($t7)
+    lw    $k0, %lo(RDRAM_CONFIG_REG)($t7)
     li    $t0, 4096
-    sw    $t0, ($t4)
+    sw    $t0, %lo(MI_MODE_REG)($t4)
     andi  $t1, $t1, 0xffff
     li    $t0, 1280
     bne   $t1, $t0, .LA4000230
@@ -178,9 +186,9 @@ glabel ipl3_entry // 0xA4000040
 #else
     li    $t0, 0xc4000000
 #endif
-    sw    $t0, 0xc($t2)
+    sw    $t0, %lo(RDRAM_MODE_REG)($t2)
     li    $t0, 0x80000000
-    sw    $t0, 0x4($t2)
+    sw    $t0, %lo(RDRAM_DEVICE_ID_REG)($t2)
     move $sp, $fp
     move $v1, $zero
 .LA4000274:
@@ -248,7 +256,7 @@ glabel ipl3_entry // 0xA4000040
     slt   $t0, $v1, $t5
     bnez  $t0, .LA4000274
      nop
-    lui   $t2, %hi(RI_REFRESH_REG)
+    lui   $t2, %hi(PHYS_TO_K1(RI_BASE_REG))
     sll   $s2, $s2, 0x13
     lui   $t1, (0x00063634 >> 16)
     ori   $t1, (0x00063634 & 0xFFFF)
@@ -269,7 +277,7 @@ glabel ipl3_entry // 0xA4000040
     lw    $s6, 0xc($sp)
     lw    $s7, 0x10($sp)
     addiu $sp, $sp, 0x18
-    cn_li $t0, EXCEPTION_TLB_MISS
+    cn_li $t0, UT_VEC
     addiu $t1, $t0, 0x4000
     addiu $t1, $t1, -0x20
     mtc0  $zero, $28
@@ -279,7 +287,7 @@ glabel ipl3_entry // 0xA4000040
     sltu  $at, $t0, $t1
     bnez  $at, .LA40003D8
      addiu $t0, $t0, 0x20
-    cn_li $t0, EXCEPTION_TLB_MISS
+    cn_li $t0, UT_VEC
     addiu $t1, $t0, 0x2000
     addiu $t1, $t1, -0x10
 .LA40003F8:
@@ -290,7 +298,7 @@ glabel ipl3_entry // 0xA4000040
     b     .LA4000458
      nop
 .LA4000410:
-    cn_li  $t0, EXCEPTION_TLB_MISS
+    cn_li  $t0, UT_VEC
     addiu $t1, $t0, 0x4000
     addiu $t1, $t1, -0x20
     mtc0  $zero, $28
@@ -300,7 +308,7 @@ glabel ipl3_entry // 0xA4000040
     sltu  $at, $t0, $t1
     bnez  $at, .LA4000428
      addiu $t0, $t0, 0x20
-    cn_li $t0, EXCEPTION_TLB_MISS
+    cn_li $t0, UT_VEC
     addiu $t1, $t0, 0x2000
     addiu $t1, $t1, -0x10
 .LA4000448:
@@ -310,7 +318,7 @@ glabel ipl3_entry // 0xA4000040
      addiu $t0, $t0, 0x10
 .LA4000458:
 #ifdef VERSION_CN
-    la    $t0, D_CN_0400049C
+    la    $t0, SP_DMEM_CN_UNK0
     lui   $t1, 0xf
     ori   $t1, $t1, 0xffff
     and   $t0, $t0, $t1
@@ -318,7 +326,7 @@ glabel ipl3_entry // 0xA4000040
     lui   $t3, 0xfff0
     and   $t2, $t2, $t3
     or    $t0, $t0, $t2
-    la    $t3, D_CN_0400074C
+    la    $t3, SP_DMEM_CN_UNK1
     and   $t3, $t3, $t1
     or    $t3, $t3, $t2
     lui   $t1, 0xa000
@@ -347,15 +355,15 @@ glabel ipl3_entry // 0xA4000040
     bnez  $t0, .LA40004B8
      nop
 #else
-    cn_li $t2, SP_DMEM
+    cn_li $t2, PHYS_TO_K1(SP_DMEM_START)
     lui   $t3, 0xfff0
     lui   $t1, 0x0010
     and   $t2, $t2, $t3
-    lui   $t0, %hi(SP_DMEM_UNK0)
+    lui   $t0, %hi(PHYS_TO_K1(SP_DMEM_UNK0))
     addiu $t1, -1
-    lui   $t3, %hi(SP_DMEM_UNK1)
-    addiu $t0, %lo(SP_DMEM_UNK0)
-    addiu $t3, %lo(SP_DMEM_UNK1)
+    lui   $t3, %hi(PHYS_TO_K1(SP_DMEM_UNK1))
+    addiu $t0, %lo(PHYS_TO_K1(SP_DMEM_UNK0))
+    addiu $t3, %lo(PHYS_TO_K1(SP_DMEM_UNK1))
     and   $t0, $t0, $t1
     and   $t3, $t3, $t1
     lui   $t1, 0xa000
@@ -369,31 +377,31 @@ glabel ipl3_entry // 0xA4000040
     addiu $t1, $t1, 4
     bnez  $at, .LA4000498
      sw    $t5, -4($t1)
-    cn_li $t4, EXCEPTION_TLB_MISS
+    cn_li $t4, UT_VEC
     jr    $t4
      nop
-    lui   $t3, %hi(D_B0000008)
-    lw    $t1, %lo(D_B0000008)($t3)
+    lui   $t3, %hi(PHYS_TO_CART(CART_ENTRYPOINT))
+    lw    $t1, %lo(PHYS_TO_CART(CART_ENTRYPOINT))($t3)
     lui   $t2, (0x1FFFFFFF >> 16)
     ori   $t2, (0x1FFFFFFF & 0xFFFF)
-    lui   $at, %hi(PI_DRAM_ADDR_REG)
+    lui   $at, %hi(PHYS_TO_K1(PI_DRAM_ADDR_REG))
     and   $t1, $t1, $t2
-    sw    $t1, %lo(PI_DRAM_ADDR_REG)($at)
-    lui   $t0, %hi(PI_STATUS_REG)
+    sw    $t1, %lo(PHYS_TO_K1(PI_DRAM_ADDR_REG))($at)
+    lui   $t0, %hi(PHYS_TO_K1(PI_STATUS_REG))
 .LA40004D0:
-    lw    $t0, %lo(PI_STATUS_REG)($t0)
-    andi  $t0, $t0, 2
+    lw    $t0, %lo(PHYS_TO_K1(PI_STATUS_REG))($t0)
+    andi  $t0, $t0, PI_STATUS_IO_BUSY
     bnezl $t0, .LA40004D0
-     lui   $t0, %hi(PI_STATUS_REG)
+    lui   $t0, %hi(PHYS_TO_K1(PI_STATUS_REG))
 #endif
-    li    $t0, 0x1000
+    li    $t0, INITIAL_DMA_ROMPOS
     add   $t0, $t0, $t3
     and   $t0, $t0, $t2
-    lui   $at, %hi(PI_CART_ADDR_REG)
-    sw    $t0, %lo(PI_CART_ADDR_REG)($at)
-    cn_li $t2, 0x000FFFFF
-    lui   $at, %hi(PI_WR_LEN_REG)
-    sw    $t2, %lo(PI_WR_LEN_REG)($at)
+    lui   $at, %hi(PHYS_TO_K1(PI_CART_ADDR_REG))
+    sw    $t0, %lo(PHYS_TO_K1(PI_CART_ADDR_REG))($at)
+    cn_li $t2, INITIAL_DMA_LEN
+    lui   $at, %hi(PHYS_TO_K1(PI_WR_LEN_REG))
+    sw    $t2, %lo(PHYS_TO_K1(PI_WR_LEN_REG))($at)
 
 .LA4000514:
     nop
@@ -424,8 +432,8 @@ glabel ipl3_entry // 0xA4000040
     nop
     nop
     nop
-    lui   $t3, %hi(PI_STATUS_REG)
-    lw    $t3, %lo(PI_STATUS_REG)($t3)
+    lui   $t3, %hi(PHYS_TO_K1(PI_STATUS_REG))
+    lw    $t3, %lo(PHYS_TO_K1(PI_STATUS_REG))($t3)
     andi  $t3, $t3, 0x1
     bnez  $t3, .LA4000514
      nop
@@ -496,39 +504,39 @@ glabel ipl3_entry // 0xA4000040
     nop
 #endif
 #ifdef VERSION_CN
-    lui   $t1, %hi(SP_PC)
-    lw    $t1, %lo(SP_PC)($t1)
+    lui   $t1, %hi(PHYS_TO_K1(SP_PC_REG))
+    lw    $t1, %lo(PHYS_TO_K1(SP_PC_REG))($t1)
     beqz  $t1, .LA4000698
      nop
     addiu $t2, $zero, 0x41
-    lui   $at, %hi(SP_STATUS_REG)
-    sw    $t2, %lo(SP_STATUS_REG)($at)
-    lui   $at, %hi(SP_PC)
-    sw    $zero, %lo(SP_PC)($at)
+    lui   $at, %hi(PHYS_TO_K1(SP_STATUS_REG))
+    sw    $t2, %lo(PHYS_TO_K1(SP_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(SP_PC_REG))
+    sw    $zero, %lo(PHYS_TO_K1(SP_PC_REG))($at)
 .LA4000698:
     li    $t3, 0x00AAAAAE
-    lui   $at, %hi(SP_STATUS_REG)
-    sw    $t3, %lo(SP_STATUS_REG)($at)
+    lui   $at, %hi(PHYS_TO_K1(SP_STATUS_REG))
+    sw    $t3, %lo(PHYS_TO_K1(SP_STATUS_REG))($at)
     li    $t0, 1365
-    lui   $at, %hi(MI_INTR_MASK_REG)
-    sw    $t0, %lo(MI_INTR_MASK_REG)($at)
-    lui   $at, %hi(SI_STATUS_REG)
-    sw    $zero, %lo(SI_STATUS_REG)($at)
-    lui   $at, %hi(AI_STATUS_REG)
-    sw    $zero, %lo(AI_STATUS_REG)($at)
+    lui   $at, %hi(PHYS_TO_K1(MI_INTR_MASK_REG))
+    sw    $t0, %lo(PHYS_TO_K1(MI_INTR_MASK_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(SI_STATUS_REG))
+    sw    $zero, %lo(PHYS_TO_K1(SI_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(AI_STATUS_REG))
+    sw    $zero, %lo(PHYS_TO_K1(AI_STATUS_REG))($at)
     li    $t1, 2048
-    lui   $at, %hi(MI_MODE_REG)
-    sw    $t1, %lo(MI_MODE_REG)($at)
+    lui   $at, %hi(PHYS_TO_K1(MI_MODE_REG))
+    sw    $t1, %lo(PHYS_TO_K1(MI_MODE_REG))($at)
     li    $t1, 2
-    lui   $at, %hi(PI_STATUS_REG)
-    sw    $t1, %lo(PI_STATUS_REG)($at)
+    lui   $at, %hi(PHYS_TO_K1(PI_STATUS_REG))
+    sw    $t1, %lo(PHYS_TO_K1(PI_STATUS_REG))($at)
     lui   $t0, (0xA0000300 >> 16)
     ori   $t0, (0xA0000300 & 0xFFFF)
     sw    $s4, ($t0)
     sw    $s3, 4($t0)
 #else
-    lui   $t3, %hi(D_B0000008)
-    lw    $a0, %lo(D_B0000008)($t3)
+    lui   $t3, %hi(PHYS_TO_CART(CART_ENTRYPOINT))
+    lw    $a0, %lo(PHYS_TO_CART(CART_ENTRYPOINT))($t3)
     move  $a1, $s6
     lui   $at, (0x5D588B65 >> 16)
     ori   $at, (0x5D588B65 & 0xFFFF)
@@ -582,11 +590,11 @@ glabel ipl3_entry // 0xA4000040
     xor   $a3, $t6, $t3
     xor   $t8, $s0, $a2
     xor   $s0, $t8, $t4
-    lui   $t3, %hi(D_B0000010)
-    lw    $t0, %lo(D_B0000010)($t3)
+    lui   $t3, %hi(PHYS_TO_CART(CART_CHECKSUM0))
+    lw    $t0, %lo(PHYS_TO_CART(CART_CHECKSUM0))($t3)
     bne   $a3, $t0, halt
-     nop
-    lw    $t0, %lo(D_B0000014)($t3)
+    nop
+    lw    $t0, %lo(PHYS_TO_CART(CART_CHECKSUM1))($t3)
     bne   $s0, $t0, halt
      nop
     bal   func_A4000690
@@ -597,36 +605,36 @@ halt:
      nop
 
 func_A4000690:
-    lui   $t1, %hi(SP_PC)
-    lw    $t1, %lo(SP_PC)($t1)
+    lui   $t1, %hi(PHYS_TO_K1(SP_PC_REG))
+    lw    $t1, %lo(PHYS_TO_K1(SP_PC_REG))($t1)
     lw    $s0, 0x14($sp)
     lw    $ra, 0x1c($sp)
     beqz  $t1, .LA40006BC
      addiu $sp, $sp, 0x20
     li    $t2, 65
-    lui   $at, %hi(SP_STATUS_REG)
-    sw    $t2, %lo(SP_STATUS_REG)($at)
-    lui   $at, %hi(SP_PC)
-    sw    $zero, %lo(SP_PC)($at)
+    lui   $at, %hi(PHYS_TO_K1(SP_STATUS_REG))
+    sw    $t2, %lo(PHYS_TO_K1(SP_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(SP_PC_REG))
+    sw    $zero, %lo(PHYS_TO_K1(SP_PC_REG))($at)
 .LA40006BC:
     li    $t3, 0x00AAAAAE
-    lui   $at, %hi(SP_STATUS_REG)
-    sw    $t3, %lo(SP_STATUS_REG)($at)
-    lui   $at, %hi(MI_INTR_MASK_REG)
+    lui   $at, %hi(PHYS_TO_K1(SP_STATUS_REG))
+    sw    $t3, %lo(PHYS_TO_K1(SP_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(MI_INTR_MASK_REG))
     li    $t0, 1365
-    sw    $t0, %lo(MI_INTR_MASK_REG)($at)
-    lui   $at, %hi(SI_STATUS_REG)
-    sw    $zero, %lo(SI_STATUS_REG)($at)
-    lui   $at, %hi(AI_STATUS_REG)
-    sw    $zero, %lo(AI_STATUS_REG)($at)
-    lui   $at, %hi(MI_MODE_REG)
+    sw    $t0, %lo(PHYS_TO_K1(MI_INTR_MASK_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(SI_STATUS_REG))
+    sw    $zero, %lo(PHYS_TO_K1(SI_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(AI_STATUS_REG))
+    sw    $zero, %lo(PHYS_TO_K1(AI_STATUS_REG))($at)
+    lui   $at, %hi(PHYS_TO_K1(MI_BASE_REG))
     li    $t1, 2048
-    sw    $t1, %lo(MI_MODE_REG)($at)
+    sw    $t1, %lo(PHYS_TO_K1(MI_BASE_REG))($at)
     li    $t1, 2
-    lui   $at, %hi(PI_STATUS_REG)
+    lui   $at, %hi(PHYS_TO_K1(PI_STATUS_REG))
     lui   $t0, (0xA0000300 >> 16)
     ori   $t0, (0xA0000300 & 0xFFFF)
-    sw    $t1, %lo(PI_STATUS_REG)($at)
+    sw    $t1, %lo(PHYS_TO_K1(PI_STATUS_REG))($at)
     sw    $s7, 0x14($t0)
 #endif
     sw    $s5, 0xc($t0)
@@ -647,7 +655,7 @@ func_A4000690:
     cn_li $t1, 0xb0000000
 .LA4000730:
     sw    $t1, 0x8($t0)
-    cn_li $t0, SP_DMEM
+    cn_li $t0, PHYS_TO_K1(SP_DMEM_START)
     addi  $t1, $t0, 0x1000
 #ifdef VERSION_CN
 .LA4000710:
@@ -661,7 +669,7 @@ func_A4000690:
     bne   $t0, $t1, .LA4000740
      sw    $zero, -4($t0)
 #endif
-    cn_li $t0, SP_IMEM
+    cn_li $t0, PHYS_TO_K1(SP_IMEM_START)
     addi  $t1, $t0, 0x1000
 #ifdef VERSION_CN
 .LA400072C:
@@ -675,8 +683,8 @@ func_A4000690:
     bne   $t0, $t1, .LA4000758
      sw    $zero, -4($t0)
 #endif
-    lui   $t3, %hi(D_B0000008)
-    lw    $t1, %lo(D_B0000008)($t3)
+    lui   $t3, %hi(PHYS_TO_CART(CART_ENTRYPOINT))
+    lw    $t1, %lo(PHYS_TO_CART(CART_ENTRYPOINT))($t3)
     jr    $t1
      nop
     nop
@@ -1074,8 +1082,8 @@ func_A4000A40:
     bne   $a1, $k1, .LA4000AC0
      sw    $t7, ($s5)
 #endif
-    lui   $k0, %hi(MI_MODE_REG)
-    sw    $zero, %lo(MI_MODE_REG)($k0)
+    lui   $k0, %hi(PHYS_TO_K1(MI_BASE_REG))
+    sw    $zero, %lo(PHYS_TO_K1(MI_BASE_REG))($k0)
 .LA4000AC0:
     lw    $ra, 0x1c($sp)
 #ifdef VERSION_CN
@@ -1094,14 +1102,14 @@ func_A4000AD0:
     move $fp, $zero
 #endif
     li    $k0, 0x2000
-    lui   $k1, %hi(MI_MODE_REG)
-    sw    $k0, %lo(MI_MODE_REG)($k1)
+    lui   $k1, %hi(PHYS_TO_K1(MI_BASE_REG))
+    sw    $k0, %lo(PHYS_TO_K1(MI_BASE_REG))($k1)
 #ifndef VERSION_CN
     move  $fp, $zero
 #endif
     lw    $fp, ($s5)
     li    $k0, 0x1000
-    sw    $k0, %lo(MI_MODE_REG)($k1)
+    sw    $k0, %lo(PHYS_TO_K1(MI_BASE_REG))($k1)
 #ifdef VERSION_CN
     move $k0, $zero
 #endif
@@ -1144,3 +1152,5 @@ func_A4000AD0:
      nop
     nop
 #endif
+
+.end ipl3_entry
