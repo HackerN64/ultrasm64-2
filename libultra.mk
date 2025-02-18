@@ -83,11 +83,11 @@ ULTRA_CFLAGS  = -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -G 0 -signed 
 ULTRA_ASFLAGS = -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -G 0 -nostdinc -o32 -c
 
 GULTRA_CC     := COMPILER_PATH=$(EGCS_PATH) $(EGCS_PATH)/gcc
-GULTRA_CFLAGS  = -mcpu=r4300 -fno-pic -Wa,--strip-local-absolute -G 0 -fno-common
+GULTRA_CFLAGS  = -mcpu=r4300 -fno-pic -Wa,--strip-local-absolute -G 0
 GULTRA_ASFLAGS = -mcpu=r4300 -fno-pic -x assembler-with-cpp -c -DEGCS_GCC
 
 ifeq ($(LIBGULTRA),1)
-  $(ULTRA_O_C_FILES): CC := $(GULTRA_CC)
+  $(ULTRA_O_C_FILES): CC := $(CC)
   $(ULTRA_O_C_FILES): CFLAGS = $(GULTRA_CFLAGS) $(NOABICALL) $(REG_SIZES)
 
   $(ULTRA_O_AS_FILES): AS := $(GULTRA_CC)

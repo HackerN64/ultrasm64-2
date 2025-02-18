@@ -348,6 +348,7 @@ SECTIONS
         BUILD_DIR/src/game/object_helpers.o(.rodata*);
 #endif
         BUILD_DIR/src/game/behavior_actions.o(.rodata*);
+        BUILD_DIR/src/game/platform_displacement.o(.rodata*);
 #ifndef VERSION_EU
         BUILD_DIR/src/game/object_collision.o(.rodata*);
         BUILD_DIR/src/game/spawn_object.o(.rodata*);
