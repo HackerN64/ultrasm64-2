@@ -182,6 +182,7 @@ endif
 #==============================================================================#
 
 TOOLS_DIR := tools
+LIBULTRA_DIR := lib/hackerlibultra
 
 # (This is a bit hacky, but a lot of rules implicitly depend
 # on tools and assets, and we use directory globs further down
@@ -349,7 +350,6 @@ DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 EGCS_AS := $(EGCS_PATH)/as
 EGCS_ASFLAGS = -mcpu=r4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i))
 
-include libultra.mk
 
 ifeq ($(VERSION),cn)
   EGCS_REASSEMBLED_ASM_FILES := $(wildcard asm/*.s)
