@@ -225,7 +225,7 @@ SECTIONS
 #define JP_PADDING_TEXT
 #endif
 //        #include "lib/ultra/ld.inc"
-          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.text*);
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
 #undef SECTION
 #ifdef VERSION_JP
 #undef JP_PADDING_TEXT
@@ -243,6 +243,7 @@ SECTIONS
         BUILD_DIR/libgcc.a:_fixdfdi.o(.text);
         BUILD_DIR/libgcc.a:_fixunssfdi.o(.text);
         BUILD_DIR/libgcc.a:_fixsfdi.o(.text);
+        BUILD_DIR/libgcc.a:*.o(.text*)
 #endif
         BUILD_DIR/lib/rsp.o(.text);
 
@@ -320,7 +321,7 @@ SECTIONS
 
 #define SECTION data*
 //        #include "lib/ultra/ld.inc"
-          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.data*);
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
 #undef SECTION
 
         /* rodata */
@@ -391,7 +392,7 @@ SECTIONS
 
 #define SECTION rodata*
 //        #include "lib/ultra/ld.inc"
-          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.rodata*);
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
 #undef SECTION
 
 #ifndef __sgi
@@ -406,6 +407,7 @@ SECTIONS
         BUILD_DIR/libgcc.a:_fixdfdi.o(.rodata*);
         BUILD_DIR/libgcc.a:_fixunssfdi.o(.rodata*);
         BUILD_DIR/libgcc.a:_fixsfdi.o(.rodata*);
+        BUILD_DIR/libgcc.a:*.o(.rodata*)
 #endif
         /* audio blobs, should really be moved into a separate file */
 #if defined(VERSION_SH) || defined(VERSION_CN)
@@ -478,7 +480,7 @@ SECTIONS
 #define SH_PFS_BSS
 #endif
 //        #include "lib/ultra/ld.inc"
-          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.bss*);
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
 #undef SECTION
 #ifdef VERSION_SH
 #undef SH_PFS_BSS
