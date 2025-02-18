@@ -224,7 +224,8 @@ SECTIONS
 // JP has an additional 0x40 of weird padding space in text
 #define JP_PADDING_TEXT
 #endif
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.text*);
 #undef SECTION
 #ifdef VERSION_JP
 #undef JP_PADDING_TEXT
@@ -318,7 +319,8 @@ SECTIONS
 #endif
 
 #define SECTION data*
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.data*);
 #undef SECTION
 
         /* rodata */
@@ -388,7 +390,8 @@ SECTIONS
         AUDIO_DIR*.o(.rodata*);
 
 #define SECTION rodata*
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.rodata*);
 #undef SECTION
 
 #ifndef __sgi
@@ -474,7 +477,8 @@ SECTIONS
 // osPfsIsPlug bss section is located slightly different in Shindou.
 #define SH_PFS_BSS
 #endif
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a*.o(.bss*);
 #undef SECTION
 #ifdef VERSION_SH
 #undef SH_PFS_BSS
