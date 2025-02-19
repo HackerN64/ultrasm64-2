@@ -224,13 +224,15 @@ SECTIONS
 // JP has an additional 0x40 of weird padding space in text
 #define JP_PADDING_TEXT
 #endif
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
+          BUILD_DIR/src/game/libgcc.o(.text);
 #undef SECTION
 #ifdef VERSION_JP
 #undef JP_PADDING_TEXT
 #endif
 
-#ifdef VERSION_CN
+#ifndef __sgi
         BUILD_DIR/libgcc.a:_divdi3.o(.text);
         BUILD_DIR/libgcc.a:_moddi3.o(.text);
         BUILD_DIR/libgcc.a:_udivdi3.o(.text);
@@ -242,6 +244,7 @@ SECTIONS
         BUILD_DIR/libgcc.a:_fixdfdi.o(.text);
         BUILD_DIR/libgcc.a:_fixunssfdi.o(.text);
         BUILD_DIR/libgcc.a:_fixsfdi.o(.text);
+        BUILD_DIR/libgcc.a:*.o(.text*)
 #endif
         BUILD_DIR/lib/rsp.o(.text);
 
@@ -318,7 +321,8 @@ SECTIONS
 #endif
 
 #define SECTION data*
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
 #undef SECTION
 
         /* rodata */
@@ -348,6 +352,7 @@ SECTIONS
         BUILD_DIR/src/game/object_helpers.o(.rodata*);
 #endif
         BUILD_DIR/src/game/behavior_actions.o(.rodata*);
+        BUILD_DIR/src/game/platform_displacement.o(.rodata*);
 #ifndef VERSION_EU
         BUILD_DIR/src/game/object_collision.o(.rodata*);
         BUILD_DIR/src/game/spawn_object.o(.rodata*);
@@ -387,10 +392,11 @@ SECTIONS
         AUDIO_DIR*.o(.rodata*);
 
 #define SECTION rodata*
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
 #undef SECTION
 
-#ifdef VERSION_CN
+#ifndef __sgi
         BUILD_DIR/libgcc.a:_divdi3.o(.rodata*);
         BUILD_DIR/libgcc.a:_moddi3.o(.rodata*);
         BUILD_DIR/libgcc.a:_udivdi3.o(.rodata*);
@@ -402,6 +408,7 @@ SECTIONS
         BUILD_DIR/libgcc.a:_fixdfdi.o(.rodata*);
         BUILD_DIR/libgcc.a:_fixunssfdi.o(.rodata*);
         BUILD_DIR/libgcc.a:_fixsfdi.o(.rodata*);
+        BUILD_DIR/libgcc.a:*.o(.rodata*)
 #endif
         /* audio blobs, should really be moved into a separate file */
 #if defined(VERSION_SH) || defined(VERSION_CN)
@@ -473,7 +480,8 @@ SECTIONS
 // osPfsIsPlug bss section is located slightly different in Shindou.
 #define SH_PFS_BSS
 #endif
-        #include "lib/ultra/ld.inc"
+//        #include "lib/ultra/ld.inc"
+          ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
 #undef SECTION
 #ifdef VERSION_SH
 #undef SH_PFS_BSS

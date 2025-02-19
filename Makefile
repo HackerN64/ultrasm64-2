@@ -23,7 +23,7 @@ TARGET_N64 ?= 1
 #   ido - uses the SGI IRIS Development Option compiler, which is used to build
 #         an original matching N64 ROM
 #   gcc - uses the GNU C Compiler
-COMPILER ?= ido
+COMPILER ?= gcc
 $(eval $(call validate-option,COMPILER,ido gcc))
 
 
@@ -171,7 +171,7 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info =======================)
 endif
 
-DEFINES += _FINALROM=1
+DEFINES += _FINALROM=1 LIBULTRA_VERSION=9
 
 ifeq ($(TARGET_N64),1)
   DEFINES += TARGET_N64=1
@@ -182,6 +182,8 @@ endif
 #==============================================================================#
 
 TOOLS_DIR := tools
+LIBULTRA_DIR := lib/hackerlibultra
+LIBULTRA_BUILD_DIR := lib/hackerlibultra/build/L/libgultra_rom
 
 # (This is a bit hacky, but a lot of rules implicitly depend
 # on tools and assets, and we use directory globs further down
@@ -211,6 +213,13 @@ ifeq ($(filter clean distclean print-%,$(MAKECMDGOALS)),)
     ifeq ($(DUMMY),FAIL)
       $(error Failed to build tools)
     endif
+
+  $(info Building hackerlibultra...)
+  DUMMY != $(MAKE) -s -C $(LIBULTRA_DIR) >&2 || echo FAIL
+    ifeq ($(DUMMY),FAIL)
+      $(error Failed to build hackerlibultra)
+    endif
+
   $(info Building ROM...)
 
 endif
@@ -237,10 +246,6 @@ LEVEL_DIRS     := $(patsubst levels/%,%,$(dir $(wildcard levels/*/header.h)))
 SRC_DIRS := src src/engine src/game src/menu src/buffers src/audio $(AUDIO_SRC_DIR) actors levels bin data assets asm lib sound
 BIN_DIRS := bin bin/$(VERSION)
 
-ifeq ($(VERSION),cn)
-  LIBGCC_SRC_DIRS += lib/src/libgcc
-endif
-
 GODDARD_SRC_DIRS := src/goddard src/goddard/dynlists
 
 # File dependencies and variables for specific files
@@ -251,7 +256,6 @@ LEVEL_C_FILES     := $(wildcard levels/*/leveldata.c) $(wildcard levels/*/script
 C_FILES           := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c)) $(LEVEL_C_FILES)
 S_FILES           := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))
 GODDARD_C_FILES   := $(foreach dir,$(GODDARD_SRC_DIRS),$(wildcard $(dir)/*.c))
-LIBGCC_C_FILES    := $(foreach dir,$(LIBGCC_SRC_DIRS),$(wildcard $(dir)/*.c))
 GENERATED_C_FILES := $(BUILD_DIR)/assets/mario_anim_data.c $(BUILD_DIR)/assets/demo_data.c
 
 # Sound files
@@ -279,10 +283,8 @@ O_FILES := $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file:.c=.o)) \
 
 GODDARD_O_FILES := $(foreach file,$(GODDARD_C_FILES),$(BUILD_DIR)/$(file:.c=.o))
 
-LIBGCC_O_FILES := $(foreach file,$(LIBGCC_C_FILES),$(BUILD_DIR)/$(file:.c=.o))
-
 # Automatic dependency files
-DEP_FILES := $(O_FILES:.o=.d) $(GODDARD_O_FILES:.o=.d) $(LIBGCC_O_FILES:.o=.d) $(BUILD_DIR)/$(LD_SCRIPT).d
+DEP_FILES := $(O_FILES:.o=.d) $(GODDARD_O_FILES:.o=.d) $(BUILD_DIR)/$(LD_SCRIPT).d
 
 # Files with GLOBAL_ASM blocks
 ifeq ($(NON_MATCHING),0)
@@ -327,7 +329,7 @@ else
   endif
 endif
 ifeq ($(COMPILER),gcc)
-  LD          := $(CROSS)ld
+  LD          := LD_LIBRARY_PATH=$(LD_PATH) $(LD_PATH)/mips64-elf-ld
 else
   LD          := LD_LIBRARY_PATH=$(LD_PATH) $(LD_PATH)/mips64-elf-ld
 endif
@@ -351,7 +353,6 @@ DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
 EGCS_AS := $(EGCS_PATH)/as
 EGCS_ASFLAGS = -mcpu=r4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i))
 
-include libultra.mk
 
 ifeq ($(VERSION),cn)
   EGCS_REASSEMBLED_ASM_FILES := $(wildcard asm/*.s)
@@ -367,8 +368,7 @@ EGCS_CFLAGS = -G 0 $(TARGET_CFLAGS) -mcpu=r4300 -fno-pic -Wa,--strip-local-absol
 # iQue recompiled some files with a different compiler
 ifeq ($(VERSION),cn)
   IQUE_RECOMPILED_SRC_GAME := $(addprefix $(BUILD_DIR)/src/game/,rumble_init.o level_update.o memory.o area.o print.o ingame_menu.o hud.o cn_common_syms_1.o cn_common_syms_2.o) $(addprefix $(BUILD_DIR)/src/menu/,title_screen.o intro_geo.o file_select.o star_select.o)
-  IQUE_RECOMPILED_LIBGCC_SRC  := $(LIBGCC_O_FILES)
-  IQUE_RECOMPILED = $(IQUE_RECOMPILED_SRC_GAME) $(IQUE_RECOMPILED_LIBGCC_SRC)
+  IQUE_RECOMPILED = $(IQUE_RECOMPILED_SRC_GAME)
   $(IQUE_RECOMPILED): CC := $(EGCS_CC)
   $(IQUE_RECOMPILED): CFLAGS = $(EGCS_CFLAGS)
   $(IQUE_RECOMPILED): MIPSISET :=
@@ -390,12 +390,14 @@ CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -st
 # C compiler options
 CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS)
 ifeq ($(COMPILER),gcc)
-  CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
+  CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+  CFLAGS += -Wno-missing-braces
 else
   CFLAGS += -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -signed -32
 endif
 
 ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
+ASMFLAGS := -G 0 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
 RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
 
 ifeq ($(shell getconf LONG_BIT), 32)
@@ -476,6 +478,7 @@ distclean: clean
 	$(PYTHON) extract_assets.py --clean
 	$(MAKE) -C $(TOOLS_DIR) clean
 	$(MAKE) -C $(TOOLS_DIR)/sm64tools clean
+	$(MAKE) -C $(LIBULTRA_DIR) clean
 
 test: $(ROM)
 	$(EMULATOR) $(EMU_FLAGS) $<
@@ -522,7 +525,7 @@ else
 endif
 $(BUILD_DIR)/bin/segment2.o: $(BUILD_DIR)/text/debug_text.raw.inc.c
 
-ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(GODDARD_SRC_DIRS) $(ULTRA_SRC_DIRS) $(LIBGCC_SRC_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) $(TEXT_DIRS) $(SOUND_SAMPLE_DIRS) $(addprefix levels/,$(LEVEL_DIRS)) rsp include) $(MIO0_DIR) $(addprefix $(MIO0_DIR)/,$(VERSION)) $(SOUND_BIN_DIR) $(SOUND_BIN_DIR)/sequences/$(VERSION)
+ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(GODDARD_SRC_DIRS) $(ULTRA_SRC_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) $(TEXT_DIRS) $(SOUND_SAMPLE_DIRS) $(addprefix levels/,$(LEVEL_DIRS)) rsp include) $(MIO0_DIR) $(addprefix $(MIO0_DIR)/,$(VERSION)) $(SOUND_BIN_DIR) $(SOUND_BIN_DIR)/sequences/$(VERSION)
 
 # Make sure build directory exists before compiling anything
 DUMMY != mkdir -p $(ALL_DIRS)
@@ -713,9 +716,6 @@ ifeq ($(NON_MATCHING),0)
   $(BUILD_DIR)/bin/%.o:              OPT_FLAGS := -g
   $(BUILD_DIR)/src/goddard/%.o:      OPT_FLAGS := -g
   $(BUILD_DIR)/src/goddard/%.o:      MIPSISET := -mips1
-  ifeq ($(VERSION),cn)
-    $(BUILD_DIR)/lib/src/libgcc/%.o:            OPT_FLAGS := -O2 -g -mips2
-  endif
 
   # Audio specific flags:
 
@@ -765,7 +765,11 @@ endif
 # Assemble assembly code
 $(BUILD_DIR)/%.o: %.s
 	$(call print,Assembling:,$<,$@)
+ifeq ($(COMPILER),gcc)
 	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY=1 $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
+else
+	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY  $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
+endif
 
 # Assemble RSP assembly code
 $(BUILD_DIR)/rsp/%.bin $(BUILD_DIR)/rsp/%_data.bin: rsp/%.s
@@ -775,22 +779,17 @@ $(BUILD_DIR)/rsp/%.bin $(BUILD_DIR)/rsp/%_data.bin: rsp/%.s
 # Run linker script through the C preprocessor
 $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 	$(call print,Preprocessing linker script:,$<,$@)
-	$(V)$(CPP) $(CPPFLAGS) -DBUILD_DIR=$(BUILD_DIR) -MMD -MP -MT $@ -MF $@.d -o $@ $<
+	$(V)$(CPP) $(CPPFLAGS) -DBUILD_DIR=$(BUILD_DIR) -DULTRA_BUILD_DIR=$(LIBULTRA_BUILD_DIR) -MMD -MP -MT $@ -MF $@.d -o $@ $<
 
 # Link libgoddard
 $(BUILD_DIR)/libgoddard.a: $(GODDARD_O_FILES)
 	@$(PRINT) "$(GREEN)Linking libgoddard:  $(BLUE)$@ $(NO_COL)\n"
 	$(V)$(AR) rcs -o $@ $(GODDARD_O_FILES)
 
-# Link libgcc
-$(BUILD_DIR)/libgcc.a: $(LIBGCC_O_FILES)
-	@$(PRINT) "$(GREEN)Linking libgcc:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(AR) rcs -o $@ $(LIBGCC_O_FILES)
-
 # Link SM64 ELF file
-$(ELF): $(O_FILES) $(MIO0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(LIBULTRA_AR) $(BUILD_DIR)/libgoddard.a $(BUILD_DIR)/libgcc.a
+$(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(BUILD_DIR)/libgoddard.a
 	@$(PRINT) "$(GREEN)Linking ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) -L $(BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -lultra -lgoddard -lgcc
+	$(V)$(LD) -L $(BUILD_DIR) -L $(LIBULTRA_BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -lgultra_rom -lgoddard
 
 # Build ROM
 ifeq ($(VERSION),cn)

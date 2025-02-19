@@ -10,7 +10,7 @@
 /* Revision */
 .half 0x0000
 .byte 20 /* Major version 2.0 */
-.ascii LIBULTRA_STR_VER /* Minor Version */
+.ascii "L" /* Minor Version */
 
 #ifdef VERSION_CN
     .fill 0x30
