@@ -314,7 +314,7 @@ endif
 
 AS            := $(CROSS)as
 ifeq ($(COMPILER),gcc)
-  CC          := /opt/mips64-elf-gcc/bin/mips64-elf-gcc
+  CC          := $(CROSS)gcc
 else
   ifeq ($(USE_QEMU_IRIX),1)
     IRIX_ROOT := $(TOOLS_DIR)/ido5.3_compiler
