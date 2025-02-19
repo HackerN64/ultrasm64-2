@@ -226,6 +226,7 @@ SECTIONS
 #endif
 //        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
+          BUILD_DIR/src/game/libgcc.o(.text);
 #undef SECTION
 #ifdef VERSION_JP
 #undef JP_PADDING_TEXT
