@@ -209,11 +209,6 @@ SECTIONS
         AUDIO_DIR/playback.o(.text);
         AUDIO_DIR/effects.o(.text);
         AUDIO_DIR/seqplayer.o(.text);
-#ifndef LIBULTRA_EXCLUSIVE
-#if defined(VERSION_SH) || defined(VERSION_CN)
-        BUILD_DIR/libultra.a:driverominit.o(.text);
-#endif
-#endif
         BUILD_DIR/src/audio/external.o(.text);
 #ifdef VERSION_EU
         AUDIO_DIR/port.o(.text);
@@ -323,6 +318,7 @@ SECTIONS
 #define SECTION data*
 //        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
+          BUILD_DIR/src/game/libgcc.o(.data*);
 #undef SECTION
 
         /* rodata */
@@ -394,6 +390,7 @@ SECTIONS
 #define SECTION rodata*
 //        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
+          BUILD_DIR/src/game/libgcc.o(.rodata*);
 #undef SECTION
 
 #ifndef __sgi
