@@ -267,9 +267,6 @@ DEP_FILES := $(O_FILES:.o=.d) $(GODDARD_O_FILES:.o=.d) $(BUILD_DIR)/$(LD_SCRIPT)
 # Compiler Options                                                             #
 #==============================================================================#
 
-EGCS_PATH := $(TOOLS_DIR)/egcs
-LD_PATH := $(TOOLS_DIR)/ld
-
 # detect hackerchain
 ifneq ($(call find-command, $(HACKERCHAIN)/mips64-elf-ld),)
     CROSS := $(HACKERCHAIN)/mips64-elf-
@@ -296,30 +293,6 @@ endif
 
 C_DEFINES := $(foreach d,$(DEFINES),-D$(d))
 DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
-
-EGCS_AS := $(EGCS_PATH)/as
-EGCS_ASFLAGS = -mcpu=r4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i))
-
-
-ifeq ($(VERSION),cn)
-  EGCS_REASSEMBLED_ASM_FILES := $(wildcard asm/*.s)
-  EGCS_REASSEMBLED_ASM_FILES := $(filter-out asm/ipl3_font.s, $(EGCS_REASSEMBLED_ASM_FILES))
-  EGCS_REASSEMBLED := $(foreach file,$(EGCS_REASSEMBLED_ASM_FILES),$(BUILD_DIR)/$(file:.s=.o))
-  $(EGCS_REASSEMBLED): AS := $(EGCS_AS)
-  $(EGCS_REASSEMBLED): ASFLAGS = $(EGCS_ASFLAGS)
-endif
-
-EGCS_CC := COMPILER_PATH=$(EGCS_PATH) $(EGCS_PATH)/gcc
-EGCS_CFLAGS = -G 0 $(TARGET_CFLAGS) -mcpu=r4300 -fno-pic -Wa,--strip-local-absolute $(DEF_INC_CFLAGS)
-
-# iQue recompiled some files with a different compiler
-ifeq ($(VERSION),cn)
-  IQUE_RECOMPILED_SRC_GAME := $(addprefix $(BUILD_DIR)/src/game/,rumble_init.o level_update.o memory.o area.o print.o ingame_menu.o hud.o cn_common_syms_1.o cn_common_syms_2.o) $(addprefix $(BUILD_DIR)/src/menu/,title_screen.o intro_geo.o file_select.o star_select.o)
-  IQUE_RECOMPILED = $(IQUE_RECOMPILED_SRC_GAME)
-  $(IQUE_RECOMPILED): CC := $(EGCS_CC)
-  $(IQUE_RECOMPILED): CFLAGS = $(EGCS_CFLAGS)
-  $(IQUE_RECOMPILED): MIPSISET :=
-endif
 
 # Prefer clang as C preprocessor if installed on the system
 ifneq (,$(call find-command,clang))
@@ -660,15 +633,9 @@ endif
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
 	$(V)$(CC) -c $(CFLAGS) $(OPT_FLAGS) $(MIPSISET) -o $@ $<
-ifeq ($(VERSION),cn)
-	$(V)$(TOOLS_DIR)/patch_elf_32bit $@
-endif
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c
 	$(call print,Compiling:,$<,$@)
 	$(V)$(CC) -c $(CFLAGS) $(OPT_FLAGS) $(MIPSISET) -o $@ $<
-ifeq ($(VERSION),cn)
-	$(V)$(TOOLS_DIR)/patch_elf_32bit $@
-endif
 
 # Assemble assembly code
 $(BUILD_DIR)/%.o: %.s
@@ -696,20 +663,12 @@ $(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG
 	$(V)$(LD) -L $(BUILD_DIR) -L $(LIBULTRA_BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -lgultra_rom -lgoddard
 
 # Build ROM
-ifeq ($(VERSION),cn)
-  PAD_TO_GAP_FILL := --pad-to=0x7B0000 --gap-fill=0x00
-else
   PAD_TO_GAP_FILL := --pad-to=0x800000 --gap-fill=0xFF
-endif
 
 $(ROM): $(ELF)
 	$(call print,Building ROM:,$<,$@)
-ifeq ($(VERSION),cn) # cn has no checksums
-	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $(@) -O binary
-else
 	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $(@:.z64=.bin) -O binary
 	$(V)$(N64CKSUM) $(@:.z64=.bin) $@
-endif
 
 $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 	$(OBJDUMP) -D $< > $@
