@@ -301,15 +301,11 @@ endif
 EGCS_PATH := $(TOOLS_DIR)/egcs
 LD_PATH := $(TOOLS_DIR)/ld
 
-# detect prefix for MIPS toolchain
-ifneq      ($(call find-command,mips-linux-gnu-ld),)
-  CROSS := mips-linux-gnu-
-else ifneq ($(call find-command,mips64-linux-gnu-ld),)
-  CROSS := mips64-linux-gnu-
-else ifneq ($(call find-command,mips64-elf-ld),)
-  CROSS := mips64-elf-
+# detect hackerchain
+ifneq ($(call find-command, $(HACKERCHAIN)/mips64-elf-ld),)
+    CROSS := $(HACKERCHAIN)/mips64-elf-
 else
-  $(error Unable to detect a suitable MIPS toolchain installed)
+    $(error Unable to detect a hackerchain toolchain installation.)
 endif
 
 AS            := $(CROSS)as
@@ -328,11 +324,7 @@ else
     COPT      := $(IDO_ROOT)/copt
   endif
 endif
-ifeq ($(COMPILER),gcc)
-  LD          := LD_LIBRARY_PATH=$(LD_PATH) $(LD_PATH)/mips64-elf-ld
-else
-  LD          := LD_LIBRARY_PATH=$(LD_PATH) $(LD_PATH)/mips64-elf-ld
-endif
+LD := $(CROSS)ld
 AR            := $(CROSS)ar
 OBJDUMP       := $(CROSS)objdump
 OBJCOPY       := $(CROSS)objcopy

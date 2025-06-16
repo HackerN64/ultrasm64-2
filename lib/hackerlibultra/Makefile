@@ -12,26 +12,11 @@ V=@
 else
 V=
 endif
-
-# detect prefix for MIPS toolchain
-ifneq ($(call find-command,mips64-elf-ld),)
-  CROSS := mips64-elf-
-else ifneq ($(call find-command,mips-n64-ld),)
-  CROSS := mips-n64-
-else ifneq ($(call find-command,mips64-ld),)
-  CROSS := mips64-
-else ifneq ($(call find-command,mips-linux-gnu-ld),)
-  CROSS := mips-linux-gnu-
-else ifneq ($(call find-command,mips64-linux-gnu-ld),)
-  CROSS := mips64-linux-gnu-
-else ifneq ($(call find-command,mips64-none-elf-ld),)
-  CROSS := mips64-none-elf-
-else ifneq ($(call find-command,mips-ld),)
-  CROSS := mips-
-else ifneq ($(call find-command,mips-suse-linux-ld ),)
-  CROSS := mips-suse-linux-
+# detect hackerchain
+ifneq ($(call find-command, $(HACKERCHAIN)/mips64-elf-ld),)
+    CROSS := $(HACKERCHAIN)/mips64-elf-
 else
-  $(error Unable to detect a suitable MIPS toolchain installed)
+    $(error Unable to detect a hackerchain toolchain installation.)
 endif
 
 BUILD_ROOT := build
