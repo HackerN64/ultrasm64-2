@@ -4,7 +4,7 @@ This repository is a clean slate for basic enhancements built upon the *Super Ma
 
 ## Quick Start (for Ubuntu)
 
-1. Install prerequisites: `sudo apt install -y binutils-mips-linux-gnu build-essential git pkgconf python3`
+1. Install prerequisites: `sudo apt install -y build-essential git pkgconf python3 isl libgmp-dev libmpfr-dev libmpc-dev`
 2. Clone the repo from within Linux: `git clone https://github.com/HackerN64/ultrasm64-2.git`
 3. Place a Super Mario 64 ROM called `baserom.<VERSION>.z64` into the project folder for asset extraction, where `VERSION` can be `jp`, `us`, `eu`, `sh`, or `cn`.
 4. Run `make` to build. Specify the version through `make VERSION=<VERSION>`. Add `-j4` to improve build speed (hardware dependent).
