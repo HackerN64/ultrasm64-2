@@ -61,7 +61,7 @@ sudo pacman -S base-devel python gcc gcc-libs libisl libmpc zstd lib32-gcc-libs 
 
 ##### Setup Hackerchain
 
-1. Download Hackerchain here.
+1. Download the Hackerchain setup script [here](https://gist.github.com/mountainflaw/820121d579b3d8e83194b69d9b287753).
 2. Create a directory where you'd like to have the build process and build output take place.
 3. After running and building Hackerchain, define the environment variable `HACKERCHAIN` in your shell's init file (`~/.bashrc` for Bash typically), have it point to the `bin` directory inside your directory for building Hackerchain.
 4. Restart your terminal.
