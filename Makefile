@@ -92,27 +92,9 @@ else ifeq ($(GRUCODE),f3dzex) # Fast3DZEX (2.0J / Animal Forest - Dōbutsu no Mo
   DEFINES += F3DZEX_GBI_2=1 F3DEX_GBI_2=1 F3DEX_GBI_SHARED=1
 endif
 
-# USE_QEMU_IRIX - when ido is selected, select which way to emulate IRIX programs
-#   1 - use qemu-irix
-#   0 - statically recompile the IRIX programs
-USE_QEMU_IRIX ?= 0
-$(eval $(call validate-option,USE_QEMU_IRIX,0 1))
-
-ifeq      ($(COMPILER),ido)
-  ifeq ($(USE_QEMU_IRIX),1)
-    # Verify that qemu-irix exists
-    QEMU_IRIX ?= $(call find-command,qemu-irix)
-    ifeq (, $(QEMU_IRIX))
-      $(error Using the IDO compiler requires qemu-irix. Please install qemu-irix package or set the QEMU_IRIX environment variable to the full qemu-irix binary path)
-    endif
-  endif
-
-  MIPSISET := -mips2
-else ifeq ($(COMPILER),gcc)
-  NON_MATCHING := 1
-  MIPSISET     := -mips3
-  OPT_FLAGS    := -O2
-endif
+NON_MATCHING := 1
+MIPSISET     := -mips3
+OPT_FLAGS    := -O2
 
 
 # NON_MATCHING - whether to build a matching, identical copy of the ROM
@@ -741,14 +723,12 @@ endif
 # Compile C code
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
-	$(V)$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
 	$(V)$(CC) -c $(CFLAGS) $(OPT_FLAGS) $(MIPSISET) -o $@ $<
 ifeq ($(VERSION),cn)
 	$(V)$(TOOLS_DIR)/patch_elf_32bit $@
 endif
 $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c
 	$(call print,Compiling:,$<,$@)
-	$(V)$(CC_CHECK) $(CC_CHECK_CFLAGS) -MMD -MP -MT $@ -MF $(BUILD_DIR)/$*.d $<
 	$(V)$(CC) -c $(CFLAGS) $(OPT_FLAGS) $(MIPSISET) -o $@ $<
 ifeq ($(VERSION),cn)
 	$(V)$(TOOLS_DIR)/patch_elf_32bit $@
