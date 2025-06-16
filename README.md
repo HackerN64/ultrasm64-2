@@ -32,37 +32,39 @@ There are 3 steps to set up a working build.
 #### Step 1: Install dependencies
 
 The build system has the following package requirements:
- * binutils-mips
  * pkgconf
  * python3 >= 3.6
 
+##### Required Packages
+
 Dependency installation instructions for common Linux distros are provided below:
 
-##### Debian / Ubuntu
+###### Fedora / RHEL
 To install build dependencies:
 ```
-sudo apt install -y binutils-mips-linux-gnu build-essential git pkgconf python3
+sudo dnf group install -y development-tools
+sudo dnf install -y python pkgconf isl-devel gmp-devel mpfr-devel libmpc-devel
 ```
+For SUSE users, please use `mpc-devel` in place of `libmpc-devel`.
 
-##### Arch Linux
+###### Debian / Ubuntu
 To install build dependencies:
 ```
-sudo pacman -S base-devel python
+sudo apt install -y build-essential git pkgconf python3 isl libgmp-dev libmpfr-dev libmpc-dev
 ```
-Install the following AUR packages:
-* [mips64-elf-binutils](https://aur.archlinux.org/packages/mips64-elf-binutils) (AUR)
 
-##### Other Linux distributions
+###### Arch Linux
+To install build dependencies:
+```
+sudo pacman -S base-devel python gcc gcc-libs libisl libmpc zstd lib32-gcc-libs glibc libmpc mpfr gmp
+```
 
-Most modern Linux distributions should have equivalent packages to the other two listed above.
-You may have to use a different version of GNU binutils. Listed below are fully compatible binutils
-distributions with support in the makefile, and examples of distros that offer them:
+##### Setup Hackerchain
 
-* `mips64-elf-` (Arch AUR)
-* `mips-linux-gnu-` (Ubuntu and other Debian-based distros)
-* `mips64-linux-gnu-` (RHEL/CentOS/Fedora)
-
-You may also use [Docker](#docker-installation) to handle installing an image with minimal dependencies.
+1. Download Hackerchain here.
+2. Create a directory where you'd like to have the build process and build output take place.
+3. After running and building Hackerchain, define the environment variable `HACKERCHAIN` in your shell's init file (`~/.bashrc` for Bash typically), have it point to the `bin` directory inside your directory for building Hackerchain.
+4. Restart your terminal.
 
 #### Step 2: Copy baserom(s) for asset extraction
 
@@ -86,7 +88,6 @@ The full list of configurable variables are listed below, with the default being
 * ``GRUCODE``: ``f3d_old``, ``f3d_new``, ``f3dex``, ``f3dex2``, ``f3dzex``
 * ``COMPARE``: ``1`` (compare ROM hash), ``0`` (do not compare ROM hash)
 * ``NON_MATCHING``: Use functionally equivalent C implementations for non-matchings. Also will avoid instances of undefined behavior.
-* ``CROSS``: Cross-compiler tool prefix (Example: ``mips64-elf-``).
 
 ### macOS
 
