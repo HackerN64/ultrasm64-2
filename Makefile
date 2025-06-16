@@ -18,13 +18,8 @@ DEFINES :=
 # Build for the N64 (turn this off for ports)
 TARGET_N64 ?= 1
 
-
-# COMPILER - selects the C compiler to use
-#   ido - uses the SGI IRIS Development Option compiler, which is used to build
-#         an original matching N64 ROM
-#   gcc - uses the GNU C Compiler
 COMPILER ?= gcc
-$(eval $(call validate-option,COMPILER,ido gcc))
+$(eval $(call validate-option,COMPILER, gcc))
 
 
 # VERSION - selects the version of the game to build
@@ -291,22 +286,8 @@ else
 endif
 
 AS            := $(CROSS)as
-ifeq ($(COMPILER),gcc)
-  CC          := $(CROSS)gcc
-else
-  ifeq ($(USE_QEMU_IRIX),1)
-    IRIX_ROOT := $(TOOLS_DIR)/ido5.3_compiler
-    CC        := $(QEMU_IRIX) -silent -L $(IRIX_ROOT) $(IRIX_ROOT)/usr/bin/cc
-    ACPP      := $(QEMU_IRIX) -silent -L $(IRIX_ROOT) $(IRIX_ROOT)/usr/lib/acpp
-    COPT      := $(QEMU_IRIX) -silent -L $(IRIX_ROOT) $(IRIX_ROOT)/usr/lib/copt
-  else
-    IDO_ROOT  := $(TOOLS_DIR)/ido-static-recomp/build/out
-    CC        := $(IDO_ROOT)/cc
-    ACPP      := $(IDO_ROOT)/acpp
-    COPT      := $(IDO_ROOT)/copt
-  endif
-endif
-LD := $(CROSS)ld
+CC            := $(CROSS)gcc
+LD            := $(CROSS)ld
 AR            := $(CROSS)ar
 OBJDUMP       := $(CROSS)objdump
 OBJCOPY       := $(CROSS)objcopy
@@ -357,30 +338,14 @@ else
   CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
 endif
 
-# Check code syntax with host compiler
-CC_CHECK := gcc
-CC_CHECK_CFLAGS := -fsyntax-only -fsigned-char $(CC_CFLAGS) $(TARGET_CFLAGS) -std=gnu90 -Wall -Wextra -Wno-format-security -Wno-main -DNON_MATCHING -DAVOID_UB $(DEF_INC_CFLAGS)
-
 # C compiler options
 CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS)
-ifeq ($(COMPILER),gcc)
-  CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
-  CFLAGS += -Wno-missing-braces
-else
-  CFLAGS += -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -signed -32
-endif
+CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+CFLAGS += -Wno-missing-braces
 
 ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
 ASMFLAGS := -G 0 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
 RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
-
-ifeq ($(shell getconf LONG_BIT), 32)
-  # Work around memory allocation bug in QEMU
-  export QEMU_GUEST_BASE := 1
-else
-  # Ensure that gcc treats the code as 32-bit
-  CC_CHECK_CFLAGS += -m32
-endif
 
 # Prevent a crash with -sopt
 export LANG := C
@@ -423,12 +388,7 @@ BLINK   := \033[33;5m
 endif
 
 # Use objcopy instead of extract_data_for_mio to get 16-byte aligned padding
-ifeq ($(COMPILER),gcc)
-  EXTRACT_DATA_FOR_MIO := $(OBJCOPY) -O binary --only-section=.data
-endif
-ifeq ($(VERSION),cn)
-  EXTRACT_DATA_FOR_MIO := $(OBJCOPY) -O binary --only-section=.data
-endif
+EXTRACT_DATA_FOR_MIO := $(OBJCOPY) -O binary --only-section=.data
 
 # Common build print status function
 define print
@@ -470,10 +430,6 @@ $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
 $(BUILD_DIR)/src/audio/sh/load.o: $(SOUND_BIN_DIR)/bank_sets.inc.c $(SOUND_BIN_DIR)/sequences_header.inc.c $(SOUND_BIN_DIR)/ctl_header.inc.c $(SOUND_BIN_DIR)/tbl_header.inc.c
 
 $(CRASH_TEXTURE_C_FILES): TEXTURE_ENCODING := u32
-
-ifeq ($(COMPILER),gcc)
-  $(BUILD_DIR)/lib/src/math/%.o: CFLAGS += -fno-builtin
-endif
 
 ifeq ($(VERSION),eu)
   TEXT_DIRS := text/de text/us text/fr
@@ -737,11 +693,7 @@ endif
 # Assemble assembly code
 $(BUILD_DIR)/%.o: %.s
 	$(call print,Assembling:,$<,$@)
-ifeq ($(COMPILER),gcc)
 	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY=1 $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
-else
-	$(V)$(CPP) $(CPPFLAGS) -D_LANGUAGE_ASSEMBLY  $< | $(AS) $(ASFLAGS) -MD $(BUILD_DIR)/$*.d -o $@
-endif
 
 # Assemble RSP assembly code
 $(BUILD_DIR)/rsp/%.bin $(BUILD_DIR)/rsp/%_data.bin: rsp/%.s
