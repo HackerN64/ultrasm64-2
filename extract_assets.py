@@ -38,6 +38,8 @@ def asset_needs_update(asset, version):
 
 
 def remove_file(fname):
+    if fname == "textures/crash_screen/crash_screen_font.ia1.png": # Preserve crash screen font
+        return
     os.remove(fname)
     print("deleting", fname)
     try:
