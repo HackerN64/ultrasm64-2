@@ -219,7 +219,6 @@ SECTIONS
 // JP has an additional 0x40 of weird padding space in text
 #define JP_PADDING_TEXT
 #endif
-//        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
           BUILD_DIR/src/game/libgcc.o(.text);
 #undef SECTION
@@ -227,20 +226,6 @@ SECTIONS
 #undef JP_PADDING_TEXT
 #endif
 
-#ifndef __sgi
-        BUILD_DIR/libgcc.a:_divdi3.o(.text);
-        BUILD_DIR/libgcc.a:_moddi3.o(.text);
-        BUILD_DIR/libgcc.a:_udivdi3.o(.text);
-        BUILD_DIR/libgcc.a:_umoddi3.o(.text);
-        BUILD_DIR/libgcc.a:_cmpdi2.o(.text);
-        BUILD_DIR/libgcc.a:_floatdidf.o(.text);
-        BUILD_DIR/libgcc.a:_floatdisf.o(.text);
-        BUILD_DIR/libgcc.a:_fixunsdfdi.o(.text);
-        BUILD_DIR/libgcc.a:_fixdfdi.o(.text);
-        BUILD_DIR/libgcc.a:_fixunssfdi.o(.text);
-        BUILD_DIR/libgcc.a:_fixsfdi.o(.text);
-        BUILD_DIR/libgcc.a:*.o(.text*)
-#endif
         BUILD_DIR/lib/rsp.o(.text);
 
         /* data */
@@ -316,7 +301,6 @@ SECTIONS
 #endif
 
 #define SECTION data*
-//        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
           BUILD_DIR/src/game/libgcc.o(.data*);
 #undef SECTION
@@ -388,25 +372,10 @@ SECTIONS
         AUDIO_DIR*.o(.rodata*);
 
 #define SECTION rodata*
-//        #include "lib/ultra/ld.inc"
           ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
           BUILD_DIR/src/game/libgcc.o(.rodata*);
 #undef SECTION
 
-#ifndef __sgi
-        BUILD_DIR/libgcc.a:_divdi3.o(.rodata*);
-        BUILD_DIR/libgcc.a:_moddi3.o(.rodata*);
-        BUILD_DIR/libgcc.a:_udivdi3.o(.rodata*);
-        BUILD_DIR/libgcc.a:_umoddi3.o(.rodata*);
-        BUILD_DIR/libgcc.a:_cmpdi2.o(.rodata*);
-        BUILD_DIR/libgcc.a:_floatdidf.o(.rodata*);
-        BUILD_DIR/libgcc.a:_floatdisf.o(.rodata*);
-        BUILD_DIR/libgcc.a:_fixunsdfdi.o(.rodata*);
-        BUILD_DIR/libgcc.a:_fixdfdi.o(.rodata*);
-        BUILD_DIR/libgcc.a:_fixunssfdi.o(.rodata*);
-        BUILD_DIR/libgcc.a:_fixsfdi.o(.rodata*);
-        BUILD_DIR/libgcc.a:*.o(.rodata*)
-#endif
         /* audio blobs, should really be moved into a separate file */
 #if defined(VERSION_SH) || defined(VERSION_CN)
         AUDIO_DIR/load.o(.data*);
