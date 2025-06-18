@@ -27,24 +27,16 @@ SECTIONS
     BEGIN_NOLOAD(buffers)
     {
         BUILD_DIR/src/buffers/buffers.o(.bss*);
-#if defined(VERSION_SH) || defined(VERSION_CN)
+#ifdef VERSION_SH
         AUDIO_DIR/port.o(.bss*);
-#else
+#endif
         AUDIO_DIR/globals_start.o(.bss*);
         AUDIO_DIR/synthesis.o(.bss*);
         AUDIO_DIR/heap.o(.bss*);
         AUDIO_DIR/load.o(.bss*);
         AUDIO_DIR/data.o(.bss*);
-#endif
+        AUDIO_DIR*.o(.bss*);
 
-#ifdef VERSION_EU
-        . = ALIGN(0x200);
-#else
-        . = ALIGN(0x1000);
-#endif
-#if defined(VERSION_SH) || defined(VERSION_CN)
-        . += 0xB000;
-#endif
         BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
     }
     END_NOLOAD(buffers)
