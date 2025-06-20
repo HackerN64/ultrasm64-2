@@ -55,7 +55,7 @@ SOFTWARE.
 #include <cstring>
 #include <cmath>
 #include <clocale>
-
+#include <cstdint>
 #include <sstream>
 #include <iomanip>
 #include <memory>
