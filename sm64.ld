@@ -24,6 +24,7 @@ SECTIONS
     . = 0x80000400;
     BEGIN_NOLOAD(zbuffer) {
         BUILD_DIR/src/buffers/zbuffer.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(zbuffer)
  
@@ -32,20 +33,13 @@ SECTIONS
     BEGIN_NOLOAD(buffers)
     {
         BUILD_DIR/src/buffers/buffers.o(.bss*);
-#ifdef VERSION_SH
-        AUDIO_DIR/port.o(.bss*);
-#endif
-        AUDIO_DIR/globals_start.o(.bss*);
-        AUDIO_DIR/synthesis.o(.bss*);
-        AUDIO_DIR/heap.o(.bss*);
-        AUDIO_DIR/load.o(.bss*);
-        AUDIO_DIR/data.o(.bss*);
-        AUDIO_DIR*.o(.bss*);
-
         BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
     }
     END_NOLOAD(buffers)
+
    . = _buffersSegmentNoloadEnd;
+   . = ALIGN(0x10);
+
     BEGIN_SEG(main, .)
     {
         BUILD_DIR/asm/entry.o(.text);
@@ -71,33 +65,28 @@ SECTIONS
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
         BUILD_DIR/src/audio/external.o(.rodata*);
         BUILD_DIR/lib/rsp.o(.rodata*);
+        . = ALIGN(0x10);
     }
     END_SEG(main)
 
     BEGIN_NOLOAD(main)
     {
         BUILD_DIR/src/game*.o(.bss*);
-        BUILD_DIR/src/audio/external.o(.bss*);
+#ifdef VERSION_SH
+        AUDIO_DIR/port.o(.bss*);
+#endif
+        AUDIO_DIR/globals_start.o(.bss*);
+        AUDIO_DIR/synthesis.o(.bss*);
+        AUDIO_DIR/heap.o(.bss*);
+        AUDIO_DIR/load.o(.bss*);
+        AUDIO_DIR/data.o(.bss*);
         AUDIO_DIR*.o(.bss*);
+        . = ALIGN(0x10);
+        BUILD_DIR/src/audio/external.o(.bss*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
-
-        . = ALIGN(0x8);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(main)
-
-#ifdef VERSION_CN
-    // Hack for CN to make these asm files to match, since we aren't using
-    // the original assembler and so can't get lui/ori from la pseudo
-
-    // asm/entry.s
-    CREATE_LO_HI_PAIR(_mainSegmentNoloadStart, ADDR (.main.noload))
-    CREATE_LO_HI_PAIR(gIdleThreadStack, gIdleThreadStack)
-    CREATE_LO_HI_PAIR(main_func, main_func)
-    
-    // asm/boot.s
-    SP_DMEM_CN_UNK0 = 0x0400049C;
-    SP_DMEM_CN_UNK1 = 0x0400074C;
-#endif
 
     CREATE_LO_HI_PAIR(_mainSegmentNoloadSize, SIZEOF (.main.noload))
     . = _mainSegmentNoloadEnd;
@@ -107,20 +96,22 @@ SECTIONS
         BUILD_DIR/src/engine*.o(.text);
         BUILD_DIR/src/engine*.o(.data*);
         BUILD_DIR/src/engine*.o(.rodata*);
-        . = ALIGN(0x100);
+        . = ALIGN(0x10);
     }
     END_SEG(engine)
     BEGIN_NOLOAD(engine)
     {
         BUILD_DIR/src/engine*.o(.bss*);
+        . = ALIGN(0x40);
     }
     END_NOLOAD(engine)
 
     . = _engineSegmentNoloadEnd;
+
     BEGIN_NOLOAD(framebuffers)
     {
         BUILD_DIR/src/buffers/framebuffers.o(.bss*);
-        . = ALIGN(0x100);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(framebuffers)
 
@@ -128,6 +119,9 @@ SECTIONS
     __mainPoolSize = RAM_END - .;
 
    ASSERT((. <= (SEG_POOL_START + POOL_SIZE)), "Error: extended past pool end.")
+
+   __expansionRamStart = 0x80400000;
+   ASSERT((. <= __expansionRamStart), "Error: RDRAM expanded into Expansion RAM, despite Expansion RAM not being defined.")
 
     BEGIN_SEG(entry, 0x10000000)
     {
@@ -209,6 +203,7 @@ SECTIONS
         BUILD_DIR/libgoddard.a:gd_math.o(.rodata*);
         BUILD_DIR/libgoddard.a:shape_helper.o(.rodata*);
         BUILD_DIR/libgoddard.a:renderer.o(.rodata*);
+        . = ALIGN(0x10);
     }
     END_SEG(goddard)
     BEGIN_NOLOAD(goddard)
@@ -229,6 +224,7 @@ SECTIONS
         BUILD_DIR/libgoddard.a:shape_helper.o(.bss*);
         BUILD_DIR/libgoddard.a:renderer.o(.bss*);
         BUILD_DIR/libgoddard.a:*.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(goddard)
 
