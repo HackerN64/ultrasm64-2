@@ -2,7 +2,10 @@ OUTPUT_ARCH (mips)
 
 /* include/segments.h defines SEG_POOL_START, SEG_POOL_END, SEG_BUFFERS,
  * SEG_GODDARD, SEG_ENGINE, SEG_FRAMEBUFFERS */
+
+#define _LD
 #include "segments.h"
+
 #include "config.h"
 #include "ld.h"
 
@@ -22,8 +25,10 @@ SECTIONS
     BEGIN_NOLOAD(zbuffer) {
         BUILD_DIR/src/buffers/zbuffer.o(.bss*);
     }
+    END_NOLOAD(zbuffer)
+ 
+    . = _zbufferSegmentNoloadEnd;
 
-    . = SEG_BUFFERS;
     BEGIN_NOLOAD(buffers)
     {
         BUILD_DIR/src/buffers/buffers.o(.bss*);
@@ -40,16 +45,8 @@ SECTIONS
         BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
     }
     END_NOLOAD(buffers)
-
-    /* lib/src/__osDevMgrMain.c and lib/src/osCreateViManager.c contain infinite
-     * loops compiled without -g, which cause the return statements and the .o
-     * files themselves to be aligned to 32-byte boundaries. But the linker
-     * Nintendo used did not respect .o file alignment, and aligned the files
-     * only to 16 bytes, in some cases misaligning them. We force the same to
-     * happen using the SUBALIGN directive. This is harmless; the alignment is
-     * just an optimization. */
-    BEGIN_SEG(main, )
-        SUBALIGN(16)
+   . = _buffersSegmentNoloadEnd;
+    BEGIN_SEG(main, .)
     {
         BUILD_DIR/asm/entry.o(.text);
         BUILD_DIR/asm/decompress.o(.text);
@@ -103,12 +100,14 @@ SECTIONS
 #endif
 
     CREATE_LO_HI_PAIR(_mainSegmentNoloadSize, SIZEOF (.main.noload))
+    . = _mainSegmentNoloadEnd;
 
-    BEGIN_SEG(engine, ADDR_OR_ALIGN(SEG_ENGINE))
+    BEGIN_SEG(engine, .)
     {
         BUILD_DIR/src/engine*.o(.text);
         BUILD_DIR/src/engine*.o(.data*);
         BUILD_DIR/src/engine*.o(.rodata*);
+        . = ALIGN(0x100);
     }
     END_SEG(engine)
     BEGIN_NOLOAD(engine)
@@ -117,12 +116,18 @@ SECTIONS
     }
     END_NOLOAD(engine)
 
-    . = ADDR_OR_ALIGN(SEG_FRAMEBUFFERS);
+    . = _engineSegmentNoloadEnd;
     BEGIN_NOLOAD(framebuffers)
     {
         BUILD_DIR/src/buffers/framebuffers.o(.bss*);
+        . = ALIGN(0x100);
     }
     END_NOLOAD(framebuffers)
+
+    __mainPoolStart = .;
+    __mainPoolSize = RAM_END - .;
+
+   ASSERT((. <= (SEG_POOL_START + POOL_SIZE)), "Error: extended past pool end.")
 
     BEGIN_SEG(entry, 0x10000000)
     {
@@ -338,8 +343,8 @@ SECTIONS
         *(*);
     }
 
-    ASSERT((_goddardSegmentNoloadEnd <= SEG_POOL_END), "Error: menu segment extended past pool end")
+    ASSERT((_goddardSegmentNoloadEnd <= SEG_POOL_START + POOL_SIZE), "Error: menu segment extended past pool end")
     ASSERT((_mainSegmentNoloadEnd <= _engineSegmentStart), "Error: main segment extended into engine.")
     ASSERT((_engineSegmentNoloadEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
-    ASSERT((_framebuffersSegmentNoloadEnd <= SEG_RAM_END), "Error: framebuffers segment extended past RDRAM end")
+    ASSERT((_framebuffersSegmentNoloadEnd <= RAM_END), "Error: framebuffers segment extended past RDRAM end")
 }
