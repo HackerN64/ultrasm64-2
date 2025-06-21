@@ -1,4 +1,4 @@
-#include "game/paintings.h"
+#include "engine/paintings.h"
 
 // 0x070122F0 - 0x07012308
 static const Lights1 ttm_seg7_lights_070122F0 = gdSPDefLights1(

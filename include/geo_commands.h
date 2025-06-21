@@ -3,12 +3,12 @@
 
 #include "command_macros_base.h"
 
-#include "game/shadow.h"
-#include "game/object_helpers.h"
-#include "game/behavior_actions.h"
-#include "game/segment2.h"
-#include "game/mario_misc.h"
-#include "game/mario_actions_cutscene.h"
+#include "engine/shadow.h"
+#include "engine/object_helpers.h"
+#include "engine/behavior_actions.h"
+#include "engine/segment2.h"
+#include "engine/mario_misc.h"
+#include "engine/mario_actions_cutscene.h"
 
 // sky background params
 #define BACKGROUND_OCEAN_SKY        0

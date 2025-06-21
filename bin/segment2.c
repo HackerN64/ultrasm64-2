@@ -4,7 +4,7 @@
 #include "config.h"
 #include "macros.h"
 #include "types.h"
-#include "game/ingame_menu.h"
+#include "engine/ingame_menu.h"
 
 #include "make_const_nonconst.h"
 
@@ -12016,6 +12016,7 @@ static const Vtx vertex_billboard_num[] = {
 // 0x0200EFF0 - 0x0200F038
 const Gfx dl_billboard_num_begin[] = {
     gsDPPipeSync(),
+    gsDPSetTextureFilter(G_TF_POINT),
     gsDPSetCombineMode(G_CC_DECALRGBA, G_CC_DECALRGBA),
     gsSPClearGeometryMode(G_LIGHTING),
     gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_WRAP | G_TX_NOMIRROR, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP | G_TX_NOMIRROR, G_TX_NOMASK, G_TX_NOLOD),
@@ -12033,6 +12034,7 @@ const Gfx dl_billboard_num_end[] = {
     gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF),
     gsDPPipeSync(),
     gsDPSetCombineMode(G_CC_SHADE, G_CC_SHADE),
+    gsDPSetTextureFilter(G_TF_BILERP),
     gsSPSetGeometryMode(G_LIGHTING),
     gsSPEndDisplayList(),
 };

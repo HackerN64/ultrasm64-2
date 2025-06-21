@@ -12,7 +12,7 @@
 #include "interaction.h"
 #include "level_update.h"
 #include "mario.h"
-#include "memory.h"
+#include "game/memory.h"
 #include "object_collision.h"
 #include "object_helpers.h"
 #include "object_list_processor.h"

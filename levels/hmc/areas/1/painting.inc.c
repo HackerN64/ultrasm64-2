@@ -1,4 +1,4 @@
-#include "game/paintings.h"
+#include "engine/paintings.h"
 
 // 0x070241B8 - 0x070241D0
 static const Lights1 hmc_seg7_lights_070241B8 = gdSPDefLights1(

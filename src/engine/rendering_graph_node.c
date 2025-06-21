@@ -1,11 +1,11 @@
 #include <PR/ultratypes.h>
 
 #include "area.h"
-#include "engine/math_util.h"
+#include "math_util.h"
 #include "game_init.h"
 #include "gfx_dimensions.h"
-#include "main.h"
-#include "memory.h"
+#include "game/main.h"
+#include "game/memory.h"
 #include "print.h"
 #include "rendering_graph_node.h"
 #include "shadow.h"

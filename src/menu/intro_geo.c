@@ -1,14 +1,14 @@
 #include <PR/ultratypes.h>
 
 #include "game/memory.h"
-#include "game/segment2.h"
-#include "game/segment7.h"
+#include "engine/segment2.h"
+#include "engine/segment7.h"
 #include "intro_geo.h"
 #include "sm64.h"
 #include "textures.h"
 #include "types.h"
 #include "buffers/framebuffers.h"
-#include "game/game_init.h"
+#include "engine/game_init.h"
 #include "audio/external.h"
 
 // frame counts for the zoom in, hold, and zoom out of title model

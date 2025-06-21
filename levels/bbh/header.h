@@ -2,7 +2,7 @@
 #define BBH_HEADER_H
 
 #include "types.h"
-#include "game/moving_texture.h"
+#include "engine/moving_texture.h"
 
 // geo
 extern const GeoLayout geo_bbh_0005B0[];

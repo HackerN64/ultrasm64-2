@@ -2,12 +2,12 @@
 #include "sm64.h"
 #include "geo_commands.h"
 
-#include "game/level_geo.h"
-#include "game/geo_misc.h"
-#include "game/camera.h"
-#include "game/moving_texture.h"
-#include "game/screen_transition.h"
-#include "game/paintings.h"
+#include "engine/level_geo.h"
+#include "engine/geo_misc.h"
+#include "engine/camera.h"
+#include "engine/moving_texture.h"
+#include "engine/screen_transition.h"
+#include "engine/paintings.h"
 #include "menu/debug_level_select.h"
 #include "menu/intro_geo.h"
 

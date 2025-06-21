@@ -1,12 +1,12 @@
 #include <ultra64.h>
 #include "sm64.h"
 
-#include "game/level_update.h"
+#include "level_update.h"
 #include "math_util.h"
 #include "game/memory.h"
 #include "graph_node.h"
-#include "game/rendering_graph_node.h"
-#include "game/area.h"
+#include "rendering_graph_node.h"
+#include "area.h"
 #include "geo_layout.h"
 
 // unused Mtx(s)

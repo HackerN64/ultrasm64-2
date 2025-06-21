@@ -2,7 +2,7 @@
 #define JRB_HEADER_H
 
 #include "types.h"
-#include "game/moving_texture.h"
+#include "engine/moving_texture.h"
 
 // geo
 extern const GeoLayout jrb_geo_000900[];

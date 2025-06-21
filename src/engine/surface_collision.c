@@ -1,10 +1,10 @@
 #include <PR/ultratypes.h>
 
 #include "sm64.h"
-#include "game/debug.h"
-#include "game/level_update.h"
-#include "game/mario.h"
-#include "game/object_list_processor.h"
+#include "debug.h"
+#include "level_update.h"
+#include "mario.h"
+#include "object_list_processor.h"
 #include "surface_collision.h"
 #include "surface_load.h"
 

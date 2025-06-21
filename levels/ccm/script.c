@@ -7,7 +7,7 @@
 #include "segment_symbols.h"
 #include "level_commands.h"
 
-#include "game/level_update.h"
+#include "engine/level_update.h"
 
 #include "levels/scripts.h"
 

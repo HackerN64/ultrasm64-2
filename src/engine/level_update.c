@@ -8,9 +8,9 @@
 #include "level_update.h"
 #include "game_init.h"
 #include "level_update.h"
-#include "main.h"
-#include "engine/math_util.h"
-#include "engine/graph_node.h"
+#include "game/main.h"
+#include "math_util.h"
+#include "graph_node.h"
 #include "area.h"
 #include "save_file.h"
 #include "sound_init.h"
@@ -22,7 +22,7 @@
 #include "save_file.h"
 #include "debug_course.h"
 #ifdef VERSION_EU
-#include "memory.h"
+#include "game/memory.h"
 #include "eu_translation.h"
 #include "segment_symbols.h"
 #endif

@@ -4,7 +4,7 @@
 #include "config.h"
 #include "gfx_dimensions.h"
 #include "game_init.h"
-#include "memory.h"
+#include "game/memory.h"
 #include "print.h"
 #include "segment2.h"
 

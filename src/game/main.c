@@ -3,15 +3,15 @@
 
 #include "sm64.h"
 #include "audio/external.h"
-#include "game_init.h"
+#include "engine/game_init.h"
 #include "memory.h"
-#include "sound_init.h"
-#include "profiler.h"
+#include "engine/sound_init.h"
+#include "engine/profiler.h"
 #include "buffers/buffers.h"
 #include "segments.h"
 #include "segment_symbols.h"
 #include "main.h"
-#include "rumble_init.h"
+#include "engine/rumble_init.h"
 
 // Message IDs
 #define MESG_SP_COMPLETE 100

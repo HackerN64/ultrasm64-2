@@ -6,7 +6,7 @@
 #include "camera.h"
 #include "rendering_graph_node.h"
 #include "engine/math_util.h"
-#include "memory.h"
+#include "game/memory.h"
 #include "save_file.h"
 #include "segment2.h"
 #include "engine/surface_collision.h"

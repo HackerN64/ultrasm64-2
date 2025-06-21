@@ -7,7 +7,7 @@
 #include "buffers/zbuffer.h"
 #include "buffers/buffers.h"
 #include "decompress.h"
-#include "game_init.h"
+#include "engine/game_init.h"
 #include "main.h"
 #include "memory.h"
 #include "segments.h"

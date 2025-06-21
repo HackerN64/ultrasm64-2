@@ -33,12 +33,13 @@ SECTIONS
     BEGIN_NOLOAD(buffers)
     {
         BUILD_DIR/src/buffers/buffers.o(.bss*);
+        . = ALIGN(0x10);
         BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(buffers)
 
    . = _buffersSegmentNoloadEnd;
-   . = ALIGN(0x10);
 
     BEGIN_SEG(main, .)
     {
@@ -58,7 +59,7 @@ SECTIONS
         BUILD_DIR/src/audio/external.o(.data*);
         BUILD_DIR/lib/rsp.o(.data*);
         
-	BUILD_DIR/asm/entry.o(.rodata*);
+        BUILD_DIR/asm/entry.o(.rodata*);
         BUILD_DIR/asm/decompress.o(.rodata*);
         BUILD_DIR/src/game*.o(.rodata*);
         AUDIO_DIR*.o(.rodata*);
@@ -90,6 +91,7 @@ SECTIONS
 
     CREATE_LO_HI_PAIR(_mainSegmentNoloadSize, SIZEOF (.main.noload))
     . = _mainSegmentNoloadEnd;
+    . = ALIGN(0x10);
 
     BEGIN_SEG(engine, .)
     {
