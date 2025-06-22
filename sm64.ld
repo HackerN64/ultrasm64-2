@@ -98,17 +98,12 @@ SECTIONS
         BUILD_DIR/src/engine*.o(.text);
         BUILD_DIR/src/engine*.o(.data*);
         BUILD_DIR/src/engine*.o(.rodata*);
-        . = ALIGN(0x10);
-    }
-    END_SEG(engine)
-    BEGIN_NOLOAD(engine)
-    {
         BUILD_DIR/src/engine*.o(.bss*);
         . = ALIGN(0x40);
     }
-    END_NOLOAD(engine)
+    END_SEG(engine)
 
-    . = _engineSegmentNoloadEnd;
+    . = _engineSegmentEnd;
 
     BEGIN_NOLOAD(framebuffers)
     {
@@ -343,6 +338,6 @@ SECTIONS
 
     ASSERT((_goddardSegmentNoloadEnd <= SEG_POOL_START + POOL_SIZE), "Error: menu segment extended past pool end")
     ASSERT((_mainSegmentNoloadEnd <= _engineSegmentStart), "Error: main segment extended into engine.")
-    ASSERT((_engineSegmentNoloadEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
+    ASSERT((_engineSegmentEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
     ASSERT((_framebuffersSegmentNoloadEnd <= RAM_END), "Error: framebuffers segment extended past RDRAM end")
 }
