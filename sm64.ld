@@ -82,9 +82,9 @@ SECTIONS
         AUDIO_DIR/load.o(.bss*);
         AUDIO_DIR/data.o(.bss*);
         AUDIO_DIR*.o(.bss*);
-        . = ALIGN(0x10);
         BUILD_DIR/src/audio/external.o(.bss*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
+        BUILD_DIR/src/engine*.o(.bss*);
         . = ALIGN(0x10);
     }
     END_NOLOAD(main)
@@ -98,7 +98,6 @@ SECTIONS
         BUILD_DIR/src/engine*.o(.text);
         BUILD_DIR/src/engine*.o(.data*);
         BUILD_DIR/src/engine*.o(.rodata*);
-        BUILD_DIR/src/engine*.o(.bss*);
         . = ALIGN(0x40);
     }
     END_SEG(engine)
