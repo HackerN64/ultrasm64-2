@@ -6,6 +6,7 @@
 
 #include "buffers/zbuffer.h"
 #include "buffers/buffers.h"
+#include "dma_async.h"
 #include "decompress.h"
 #include "engine/game_init.h"
 #include "main.h"
@@ -342,7 +343,10 @@ void *load_segment_decompress(s32 segment, u8 *srcStart, u8 *srcEnd) {
         dest = main_pool_alloc(*size, MEMORY_POOL_LEFT);
         if (dest != NULL) {
             CN_DEBUG_PRINTF(("start decompress\n"));
-            decompress(compressed, dest);
+            dma_read(compressed, srcStart, srcStart + DMA_ASYNC_HEADER_SIZE);
+            DMAAsyncCtx asyncCtx;
+            dma_async_ctx_init(&asyncCtx, compressed + DMA_ASYNC_HEADER_SIZE, srcStart + DMA_ASYNC_HEADER_SIZE, srcEnd);
+            lz4t_unpack_fast(compressed, dest, &asyncCtx);
             CN_DEBUG_PRINTF(("end decompress\n"));
 
             set_segment_base_addr(segment, dest);
@@ -352,22 +356,6 @@ void *load_segment_decompress(s32 segment, u8 *srcStart, u8 *srcEnd) {
     } else {
     }
     return dest;
-}
-
-void *load_segment_decompress_heap(u32 segment, u8 *srcStart, u8 *srcEnd) {
-    UNUSED void *dest = NULL;
-    u32 compSize = ALIGN16(srcEnd - srcStart);
-    u8 *compressed = main_pool_alloc(compSize, MEMORY_POOL_RIGHT);
-    UNUSED u32 *pUncSize = (u32 *) (compressed + 4);
-
-    if (compressed != NULL) {
-        dma_read(compressed, srcStart, srcEnd);
-        decompress(compressed, gDecompressionHeap);
-        set_segment_base_addr(segment, gDecompressionHeap);
-        main_pool_free(compressed);
-    } else {
-    }
-    return gDecompressionHeap;
 }
 
 #ifndef LIBDRAGON_IPL3

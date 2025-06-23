@@ -315,7 +315,7 @@ export LANG := C
 #==============================================================================#
 
 # N64 tools
-MIO0TOOL              := $(TOOLS_DIR)/sm64tools/mio0
+MIO0TOOL              := $(TOOLS_DIR)/lz4tpack
 N64CKSUM              := $(TOOLS_DIR)/sm64tools/n64cksum
 N64GRAPHICS           := $(TOOLS_DIR)/sm64tools/n64graphics
 N64GRAPHICS_CI        := $(TOOLS_DIR)/sm64tools/n64graphics_ci

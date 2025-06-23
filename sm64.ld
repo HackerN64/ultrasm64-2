@@ -46,7 +46,8 @@ SECTIONS
     BEGIN_SEG(main, .)
     {
         BUILD_DIR/asm/entry.o(.text);
-        BUILD_DIR/asm/decompress.o(.text);
+        BUILD_DIR/asm/decompress.o(.text*);
+        BUILD_DIR/src/game/dma_async.o(.text);
         BUILD_DIR/src/game*.o(.text);
         AUDIO_DIR*.o(.text);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
@@ -55,6 +56,7 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.data*);
         BUILD_DIR/asm/decompress.o(.data*);
+        BUILD_DIR/src/game/dma_async.o(.data);
         BUILD_DIR/src/game*.o(.data*);
         AUDIO_DIR*.o(.data*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
@@ -63,6 +65,7 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.rodata*);
         BUILD_DIR/asm/decompress.o(.rodata*);
+        BUILD_DIR/src/game/dma_async.o(.rodata);
         BUILD_DIR/src/game*.o(.rodata*);
         AUDIO_DIR*.o(.rodata*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
