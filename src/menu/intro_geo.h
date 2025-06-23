@@ -5,7 +5,7 @@
 #include <PR/gbi.h>
 
 #include "types.h"
-#include "engine/graph_node.h"
+#include "game/graph_node.h"
 
 Gfx *geo_intro_super_mario_64_logo(s32 sp50, struct GraphNode *sp54, UNUSED void *context);
 Gfx *geo_intro_tm_copyright(s32 sp40, struct GraphNode *sp44, UNUSED void *context);

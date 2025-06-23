@@ -2,8 +2,8 @@
 
 #include "audio/external.h"
 #include "behavior_data.h"
-#include "engine/behavior_script.h"
-#include "engine/graph_node.h"
+#include "game/behavior_script.h"
+#include "game/graph_node.h"
 #include "object_helpers.h"
 #include "object_list_processor.h"
 #include "sm64.h"

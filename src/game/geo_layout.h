@@ -3,7 +3,7 @@
 
 #include <PR/ultratypes.h>
 
-#include "game/memory.h"
+#include "init/memory.h"
 #include "macros.h"
 #include "types.h"
 

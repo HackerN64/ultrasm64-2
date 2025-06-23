@@ -1,10 +1,10 @@
 #include <PR/ultratypes.h>
 
 #include "audio/external.h"
-#include "engine/geo_layout.h"
-#include "engine/graph_node.h"
-#include "engine/math_util.h"
-#include "engine/surface_collision.h"
+#include "game/geo_layout.h"
+#include "game/graph_node.h"
+#include "game/math_util.h"
+#include "game/surface_collision.h"
 #include "level_table.h"
 #include "object_constants.h"
 #include "object_fields.h"

@@ -2,8 +2,8 @@
 
 #include "sm64.h"
 #include "game_init.h"
-#include "main.h"
-#include "engine/math_util.h"
+#include "init/main.h"
+#include "math_util.h"
 #include "area.h"
 #include "level_update.h"
 #include "save_file.h"

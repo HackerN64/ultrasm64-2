@@ -1,12 +1,12 @@
 #include <PR/ultratypes.h>
 
 #include "audio/external.h"
-#include "engine/math_util.h"
+#include "game/math_util.h"
 #include "game/area.h"
 #include "game/game_init.h"
 #include "game/level_update.h"
-#include "game/main.h"
-#include "game/memory.h"
+#include "init/main.h"
+#include "init/memory.h"
 #include "game/print.h"
 #include "game/save_file.h"
 #include "game/sound_init.h"

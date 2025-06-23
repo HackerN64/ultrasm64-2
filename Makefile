@@ -5,8 +5,18 @@ include util.mk
 # Default target
 default: all
 
+# Use Libdragon IPL3
+# WARNING: This CAN and WILL break certain (most) emulators.
+# Use if you care about console or ares boot times.
+
+LIBDRAGON_IPL3 := 0
+
 # Preprocessor definitions
 DEFINES :=
+
+ifeq ($(LIBDRAGON_IPL3), 1)
+  DEFINES += LIBDRAGON_IPL3=1
+endif
 
 #==============================================================================#
 # Build Options                                                                #
@@ -33,33 +43,23 @@ $(eval $(call validate-option,VERSION,jp us eu sh cn))
 
 ifeq      ($(VERSION),jp)
   DEFINES   += VERSION_JP=1
-  OPT_FLAGS := -g
-  GRUCODE   ?= f3d_old
-  LIBULTRA ?= D
+  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/us_jp
 else ifeq ($(VERSION),us)
   DEFINES   += VERSION_US=1
-  OPT_FLAGS := -g
-  GRUCODE   ?= f3d_old
-  LIBULTRA ?= D
+  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/us_jp
 else ifeq ($(VERSION),eu)
   DEFINES   += VERSION_EU=1
-  OPT_FLAGS := -O2
-  GRUCODE   ?= f3d_new
-  LIBULTRA ?= F
+  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/eu
 else ifeq ($(VERSION),sh)
   DEFINES   += VERSION_SH=1
-  OPT_FLAGS := -O2
-  GRUCODE   ?= f3d_new
-  LIBULTRA ?= H
+  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/sh
 else ifeq ($(VERSION),cn)
   DEFINES   += VERSION_CN=1
-  OPT_FLAGS := -O2
-  GRUCODE   ?= f3d_new
-  LIBULTRA ?= BB
+  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/sh
 endif
 
@@ -89,7 +89,7 @@ endif
 
 NON_MATCHING := 1
 MIPSISET     := -mips3
-OPT_FLAGS    := -O2
+OPT_FLAGS    := -Os
 
 
 # NON_MATCHING - whether to build a matching, identical copy of the ROM
@@ -135,15 +135,10 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info Version:        $(VERSION))
   $(info Microcode:      $(GRUCODE))
   $(info Target:         $(TARGET))
-  ifeq ($(COMPARE),1)
-    $(info Compare ROM:    yes)
+  ifeq ($(LIBDRAGON_IPL3),1)
+    $(info IPL:            Libdragon IPL3 Compat)
   else
-    $(info Compare ROM:    no)
-  endif
-  ifeq ($(NON_MATCHING),1)
-    $(info Build Matching: no)
-  else
-    $(info Build Matching: yes)
+    $(info IPL:            Nintendo IPL3)
   endif
   $(info =======================)
 endif
@@ -220,7 +215,7 @@ ACTOR_DIR      := actors
 LEVEL_DIRS     := $(patsubst levels/%,%,$(dir $(wildcard levels/*/header.h)))
 
 # Directories containing source files
-SRC_DIRS := src src/engine src/game src/menu src/buffers src/audio $(AUDIO_SRC_DIR) actors levels bin data assets asm lib sound
+SRC_DIRS := src src/game src/init src/menu src/buffers src/audio $(AUDIO_SRC_DIR) actors levels bin data assets asm lib sound
 BIN_DIRS := bin bin/$(VERSION)
 
 GODDARD_SRC_DIRS := src/goddard src/goddard/dynlists
@@ -305,7 +300,7 @@ endif
 
 # C compiler options
 CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS)
-CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
 CFLAGS += -Wno-missing-braces
 
 ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
@@ -320,7 +315,7 @@ export LANG := C
 #==============================================================================#
 
 # N64 tools
-MIO0TOOL              := $(TOOLS_DIR)/sm64tools/mio0
+MIO0TOOL              := $(TOOLS_DIR)/lz4tpack
 N64CKSUM              := $(TOOLS_DIR)/sm64tools/n64cksum
 N64GRAPHICS           := $(TOOLS_DIR)/sm64tools/n64graphics
 N64GRAPHICS_CI        := $(TOOLS_DIR)/sm64tools/n64graphics_ci
@@ -336,7 +331,7 @@ else
   RSPASM              := $(TOOLS_DIR)/armips
 endif
 ENDIAN_BITWIDTH       := $(BUILD_DIR)/endian-and-bitwidth
-EMULATOR = mupen64plus
+EMULATOR = ares
 EMU_FLAGS = --noosd
 LOADER = loader64
 LOADER_FLAGS = -vwf
@@ -387,7 +382,7 @@ load: $(ROM)
 
 # Extra object file dependencies
 $(BUILD_DIR)/asm/ipl3_font.o:         $(IPL3_RAW_FILES)
-$(BUILD_DIR)/src/game/crash_screen.o: $(CRASH_TEXTURE_C_FILES)
+$(BUILD_DIR)/src/init/crash_screen.o: $(CRASH_TEXTURE_C_FILES)
 $(BUILD_DIR)/lib/rsp.o:               $(BUILD_DIR)/rsp/rspboot.bin $(BUILD_DIR)/rsp/fast3d.bin $(BUILD_DIR)/rsp/audio.bin
 $(SOUND_BIN_DIR)/sound_data.o:        $(SOUND_BIN_DIR)/sound_data.ctl.inc.c $(SOUND_BIN_DIR)/sound_data.tbl.inc.c $(SOUND_BIN_DIR)/sequences.bin.inc.c $(SOUND_BIN_DIR)/bank_sets.inc.c
 $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
@@ -592,43 +587,6 @@ $(BUILD_DIR)/include/level_headers.h: levels/level_headers.h.in
 # Compilation Recipes                                                          #
 #==============================================================================#
 
-# Alternate compiler flags needed for matching
-ifeq ($(NON_MATCHING),0)
-  $(BUILD_DIR)/levels/%/leveldata.o: OPT_FLAGS := -g
-  $(BUILD_DIR)/actors/%.o:           OPT_FLAGS := -g
-  $(BUILD_DIR)/bin/%.o:              OPT_FLAGS := -g
-  $(BUILD_DIR)/src/goddard/%.o:      OPT_FLAGS := -g
-  $(BUILD_DIR)/src/goddard/%.o:      MIPSISET := -mips1
-
-  # Audio specific flags:
-
-  # For EU, all audio files other than external.c and port.c put string literals
-  # in .data. (In Shindou, the port.c string literals also moved to .data.)
-  $(BUILD_DIR)/src/audio/eu/%.o:          OPT_FLAGS := -O2 -use_readwrite_const
-  $(BUILD_DIR)/src/audio/eu/port.o:       OPT_FLAGS := -O2
-
-  # US/JP disable loop unrolling and enable -framepointer for one file.
-  $(BUILD_DIR)/src/audio/us_jp/%.o:         OPT_FLAGS := -O2 -Wo,-loopunroll,0
-  $(BUILD_DIR)/src/audio/us_jp/load.o:      OPT_FLAGS := -O2 -Wo,-loopunroll,0 -framepointer
-
-  # The source-to-source optimizer copt is enabled for US/JP audio. This makes it use
-  # acpp, which needs -Wp,-+ to handle C++-style comments.
-  # All other files than external.c should really use copt, but only a few have
-  # been matched so far.
-  $(BUILD_DIR)/src/audio/us_jp/effects.o:   OPT_FLAGS := -O2 -Wo,-loopunroll,0 -sopt,-inline=sequence_channel_process_sound,-scalaroptimize=1 -Wp,-+
-  $(BUILD_DIR)/src/audio/us_jp/synthesis.o: OPT_FLAGS := -O2 -Wo,-loopunroll,0 -sopt,-scalaroptimize=1 -Wp,-+
-
-  $(BUILD_DIR)/src/audio/external.o:        OPT_FLAGS := -O2 -Wo,-loopunroll,0
-
-# Add a target for build/eu/src/audio/*.copt to make it easier to see debug
-$(BUILD_DIR)/src/audio/%.acpp: src/audio/%.c
-	$(ACPP) $(TARGET_CFLAGS) $(DEF_INC_CFLAGS) -D__sgi -+ $< > $@
-$(BUILD_DIR)/src/audio/%.copt: $(BUILD_DIR)/src/audio/%.acpp
-	$(COPT) -signed -I=$< -CMP=$@ -cp=i -scalaroptimize=1 $(COPTFLAGS)
-$(BUILD_DIR)/src/audio/%/seqplayer.copt: COPTFLAGS := -inline_manual
-
-endif
-
 # Compile C code
 $(BUILD_DIR)/%.o: %.c
 	$(call print,Compiling:,$<,$@)
@@ -667,8 +625,12 @@ $(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG
 
 $(ROM): $(ELF)
 	$(call print,Building ROM:,$<,$@)
+ifeq ($(LIBDRAGON_IPL3), 0)
 	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $(@:.z64=.bin) -O binary
 	$(V)$(N64CKSUM) $(@:.z64=.bin) $@
+else
+	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $@ -O binary
+endif
 
 $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 	$(OBJDUMP) -D $< > $@

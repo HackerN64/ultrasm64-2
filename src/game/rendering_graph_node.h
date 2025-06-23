@@ -3,7 +3,7 @@
 
 #include <PR/ultratypes.h>
 
-#include "engine/graph_node.h"
+#include "game/graph_node.h"
 
 extern struct GraphNodeRoot *gCurGraphNodeRoot;
 extern struct GraphNodeMasterList *gCurGraphNodeMasterList;

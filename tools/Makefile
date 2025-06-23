@@ -7,7 +7,7 @@ CC           := gcc
 CXX          := g++
 CFLAGS       := -I . -I sm64tools -Wall -Wextra -Wno-unused-parameter -pedantic -O2 -s
 LDFLAGS      := -lm
-ALL_PROGRAMS := armips textconv patch_elf_32bit aifc_decode aiff_extract_codebook vadpcm_enc tabledesign extract_data_for_mio skyconv
+ALL_PROGRAMS := armips textconv patch_elf_32bit aifc_decode aiff_extract_codebook vadpcm_enc tabledesign extract_data_for_mio skyconv lz4tpack
 LIBAUDIOFILE := audiofile/libaudiofile.a
 
 # Only build armips from tools if it is not found on the system
@@ -18,6 +18,9 @@ else
 endif
 
 default: all
+
+lz4tpack_SOURCES := lz4tpack.c
+lz4tpack_CFLAGS  := -DLZ4T -flto -O3 -fwhole-program
 
 textconv_SOURCES := textconv.c utf8.c hashtable.c
 

@@ -7,7 +7,7 @@
 #include "macros.h"
 
 #include "buffers/buffers.h"
-#include "main.h"
+#include "init/main.h"
 #include "rumble_init.h"
 
 FORCE_BSS OSThread gRumblePakThread;

@@ -7,10 +7,10 @@
 #include "buffers/gfx_output_buffer.h"
 #include "buffers/framebuffers.h"
 #include "buffers/zbuffer.h"
-#include "engine/level_script.h"
+#include "game/level_script.h"
 #include "game_init.h"
-#include "main.h"
-#include "memory.h"
+#include "init/main.h"
+#include "init/memory.h"
 #include "profiler.h"
 #include "save_file.h"
 #include "seq_ids.h"
@@ -637,6 +637,8 @@ void setup_game_memory(void) {
     load_segment_decompress(2, _segment2_mio0SegmentRomStart, _segment2_mio0SegmentRomEnd);
 }
 
+extern u32 bootTime;
+
 /**
  * Main game loop thread. Runs forever as long as the game continues.
  */
@@ -692,7 +694,9 @@ void thread5_game_loop(UNUSED void *arg) {
         addr = level_script_execute(addr);
 
         display_and_vsync();
-
+        char buff[64];
+        //sprintf(buff, "BOOT TIME: %u", bootTime);
+        //print_text(64, 64, buff);
         // when debug info is enabled, print the "BUF %d" information.
         if (gShowDebugText) {
             // subtract the end of the gfx pool with the display list to obtain the

@@ -17,13 +17,16 @@ SECTIONS
     {
         BUILD_DIR/asm/rom_header.o(.text);
         BUILD_DIR/asm/boot.o(.text);
+#ifndef LIBDRAGON_IPL3
         BUILD_DIR/asm/ipl3_font.o(.text);
+#endif
     }
     END_SEG(boot)
 
     . = 0x80000400;
     BEGIN_NOLOAD(zbuffer) {
         BUILD_DIR/src/buffers/zbuffer.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(zbuffer)
  
@@ -32,6 +35,54 @@ SECTIONS
     BEGIN_NOLOAD(buffers)
     {
         BUILD_DIR/src/buffers/buffers.o(.bss*);
+        . = ALIGN(0x10);
+        BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
+        . = ALIGN(0x10);
+    }
+    END_NOLOAD(buffers)
+
+   . = _buffersSegmentNoloadEnd;
+
+    BEGIN_SEG(main, .)
+    {
+        BUILD_DIR/asm/entry.o(.text);
+        BUILD_DIR/asm/decompress.o(.text*);
+        BUILD_DIR/src/init/dma_async.o(.text);
+        BUILD_DIR/src/init*.o(.text);
+        AUDIO_DIR*.o(.text);
+        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
+        BUILD_DIR/src/audio/external.o(.text);
+        BUILD_DIR/lib/rsp.o(.text);
+
+        BUILD_DIR/asm/entry.o(.data*);
+        BUILD_DIR/asm/decompress.o(.data*);
+        BUILD_DIR/src/init/dma_async.o(.data);
+        BUILD_DIR/src/init*.o(.data*);
+        AUDIO_DIR*.o(.data*);
+        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
+        BUILD_DIR/src/audio/external.o(.data*);
+        BUILD_DIR/lib/rsp.o(.data*);
+
+        BUILD_DIR/asm/entry.o(.rodata*);
+        BUILD_DIR/asm/decompress.o(.rodata*);
+        BUILD_DIR/src/init/dma_async.o(.rodata);
+        BUILD_DIR/src/init*.o(.rodata*);
+        AUDIO_DIR*.o(.rodata*);
+        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
+        BUILD_DIR/src/audio/external.o(.rodata*);
+        BUILD_DIR/lib/rsp.o(.rodata*);
+#ifdef LIBDRAGON_IPL3
+        BUILD_DIR/src/game*.o(.text);
+        BUILD_DIR/src/game*.o(.data*);
+        BUILD_DIR/src/game*.o(.rodata*);
+#endif
+        . = ALIGN(0x10);
+    }
+    END_SEG(main)
+
+    BEGIN_NOLOAD(main)
+    {
+        BUILD_DIR/src/init*.o(.bss*);
 #ifdef VERSION_SH
         AUDIO_DIR/port.o(.bss*);
 #endif
@@ -41,86 +92,39 @@ SECTIONS
         AUDIO_DIR/load.o(.bss*);
         AUDIO_DIR/data.o(.bss*);
         AUDIO_DIR*.o(.bss*);
-
-        BUILD_DIR/src/buffers/gfx_output_buffer.o(.bss*);
-    }
-    END_NOLOAD(buffers)
-   . = _buffersSegmentNoloadEnd;
-    BEGIN_SEG(main, .)
-    {
-        BUILD_DIR/asm/entry.o(.text);
-        BUILD_DIR/asm/decompress.o(.text);
-        BUILD_DIR/src/game*.o(.text);
-        AUDIO_DIR*.o(.text);
-        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
-        BUILD_DIR/src/audio/external.o(.text);
-        BUILD_DIR/lib/rsp.o(.text);
-
-        BUILD_DIR/asm/entry.o(.data*);
-        BUILD_DIR/asm/decompress.o(.data*);
-        BUILD_DIR/src/game*.o(.data*);
-        AUDIO_DIR*.o(.data*);
-        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
-        BUILD_DIR/src/audio/external.o(.data*);
-        BUILD_DIR/lib/rsp.o(.data*);
-        
-	BUILD_DIR/asm/entry.o(.rodata*);
-        BUILD_DIR/asm/decompress.o(.rodata*);
-        BUILD_DIR/src/game*.o(.rodata*);
-        AUDIO_DIR*.o(.rodata*);
-        ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
-        BUILD_DIR/src/audio/external.o(.rodata*);
-        BUILD_DIR/lib/rsp.o(.rodata*);
-    }
-    END_SEG(main)
-
-    BEGIN_NOLOAD(main)
-    {
-        BUILD_DIR/src/game*.o(.bss*);
         BUILD_DIR/src/audio/external.o(.bss*);
-        AUDIO_DIR*.o(.bss*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
-
-        . = ALIGN(0x8);
+        BUILD_DIR/src/game*.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(main)
-
-#ifdef VERSION_CN
-    // Hack for CN to make these asm files to match, since we aren't using
-    // the original assembler and so can't get lui/ori from la pseudo
-
-    // asm/entry.s
-    CREATE_LO_HI_PAIR(_mainSegmentNoloadStart, ADDR (.main.noload))
-    CREATE_LO_HI_PAIR(gIdleThreadStack, gIdleThreadStack)
-    CREATE_LO_HI_PAIR(main_func, main_func)
-    
-    // asm/boot.s
-    SP_DMEM_CN_UNK0 = 0x0400049C;
-    SP_DMEM_CN_UNK1 = 0x0400074C;
-#endif
 
     CREATE_LO_HI_PAIR(_mainSegmentNoloadSize, SIZEOF (.main.noload))
     . = _mainSegmentNoloadEnd;
 
+#ifndef LIBDRAGON_IPL3
+    . = ALIGN(0x10);
+#else
+    . = ALIGN(0x40);
+#endif
+
+#ifndef LIBDRAGON_IPL3
     BEGIN_SEG(engine, .)
     {
-        BUILD_DIR/src/engine*.o(.text);
-        BUILD_DIR/src/engine*.o(.data*);
-        BUILD_DIR/src/engine*.o(.rodata*);
-        . = ALIGN(0x100);
+        BUILD_DIR/src/game*.o(.text);
+        BUILD_DIR/src/game*.o(.data*);
+        BUILD_DIR/src/game*.o(.rodata*);
+        . = ALIGN(0x40);
     }
     END_SEG(engine)
-    BEGIN_NOLOAD(engine)
-    {
-        BUILD_DIR/src/engine*.o(.bss*);
-    }
-    END_NOLOAD(engine)
 
-    . = _engineSegmentNoloadEnd;
+    . = _engineSegmentEnd;
+#endif
+
     BEGIN_NOLOAD(framebuffers)
     {
         BUILD_DIR/src/buffers/framebuffers.o(.bss*);
-        . = ALIGN(0x100);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(framebuffers)
 
@@ -128,6 +132,9 @@ SECTIONS
     __mainPoolSize = RAM_END - .;
 
    ASSERT((. <= (SEG_POOL_START + POOL_SIZE)), "Error: extended past pool end.")
+
+   __expansionRamStart = 0x80400000;
+   ASSERT((. <= __expansionRamStart), "Error: RDRAM expanded into Expansion RAM, despite Expansion RAM not being defined.")
 
     BEGIN_SEG(entry, 0x10000000)
     {
@@ -209,6 +216,7 @@ SECTIONS
         BUILD_DIR/libgoddard.a:gd_math.o(.rodata*);
         BUILD_DIR/libgoddard.a:shape_helper.o(.rodata*);
         BUILD_DIR/libgoddard.a:renderer.o(.rodata*);
+        . = ALIGN(0x10);
     }
     END_SEG(goddard)
     BEGIN_NOLOAD(goddard)
@@ -229,6 +237,7 @@ SECTIONS
         BUILD_DIR/libgoddard.a:shape_helper.o(.bss*);
         BUILD_DIR/libgoddard.a:renderer.o(.bss*);
         BUILD_DIR/libgoddard.a:*.o(.bss*);
+        . = ALIGN(0x10);
     }
     END_NOLOAD(goddard)
 
@@ -344,7 +353,11 @@ SECTIONS
     }
 
     ASSERT((_goddardSegmentNoloadEnd <= SEG_POOL_START + POOL_SIZE), "Error: menu segment extended past pool end")
+#ifndef LIBDRAGON_IPL3
     ASSERT((_mainSegmentNoloadEnd <= _engineSegmentStart), "Error: main segment extended into engine.")
-    ASSERT((_engineSegmentNoloadEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
+    ASSERT((_engineSegmentEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
+#else
+    ASSERT((_mainSegmentNoloadEnd <= _framebuffersSegmentNoloadStart), "Error: main segment extended into framebuffers.")
+#endif
     ASSERT((_framebuffersSegmentNoloadEnd <= RAM_END), "Error: framebuffers segment extended past RDRAM end")
 }

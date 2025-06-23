@@ -4,7 +4,7 @@
 
 #include "geo_layout.h"
 #include "math_util.h"
-#include "game/memory.h"
+#include "init/memory.h"
 #include "graph_node.h"
 
 typedef void (*GeoLayoutCommandProc)(void);

@@ -1,7 +1,7 @@
 #include <PR/ultratypes.h>
 
-#include "engine/math_util.h"
-#include "engine/surface_collision.h"
+#include "game/math_util.h"
+#include "game/surface_collision.h"
 #include "level_update.h"
 #include "object_fields.h"
 #include "object_helpers.h"

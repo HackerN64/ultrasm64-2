@@ -5,7 +5,7 @@
 
 #include "types.h"
 #include "camera.h"
-#include "engine/graph_node.h"
+#include "game/graph_node.h"
 
 struct WarpNode {
     /*00*/ u8 id;

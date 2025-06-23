@@ -3,7 +3,7 @@
 
 #include <PR/ultratypes.h>
 
-#include "engine/surface_collision.h"
+#include "game/surface_collision.h"
 #include "macros.h"
 #include "types.h"
 

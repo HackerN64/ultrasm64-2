@@ -5,8 +5,8 @@
 
 #include "types.h"
 #include "area.h"
-#include "engine/geo_layout.h"
-#include "engine/graph_node.h"
+#include "game/geo_layout.h"
+#include "game/graph_node.h"
 
 #include "level_table.h"
 

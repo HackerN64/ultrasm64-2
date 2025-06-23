@@ -30,7 +30,7 @@ index 00000000..1ffe0288
 +#include "sm64.h"
 +#include "game/game_init.h"
 +#include "game/geo_misc.h"
-+#include "engine/math_util.h"
++#include "game/math_util.h"
 +
 +#include "debug_box.h"
 +

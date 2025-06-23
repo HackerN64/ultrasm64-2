@@ -1,8 +1,8 @@
 #include <ultra64.h>
 
 #include "sm64.h"
-#include "engine/math_util.h"
-#include "engine/surface_collision.h"
+#include "game/math_util.h"
+#include "game/surface_collision.h"
 #include "mario.h"
 #include "audio/external.h"
 #include "game_init.h"

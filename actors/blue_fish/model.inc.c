@@ -1,7 +1,7 @@
 // Blue Fish
 
 // 0x0301B5C8
-static const Lights1 blue_fish_seg3_lights_0301B5C8 = gdSPDefLights1(
+ALIGNED8 static const Lights1 blue_fish_seg3_lights_0301B5C8 = gdSPDefLights1(
     0x3f, 0x3f, 0x3f,
     0xff, 0xff, 0xff, 0x28, 0x28, 0x28
 );

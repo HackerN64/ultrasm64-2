@@ -4,7 +4,7 @@
 #include "rendering_graph_node.h"
 #include "mario_misc.h"
 #include "skybox.h"
-#include "engine/math_util.h"
+#include "game/math_util.h"
 #include "camera.h"
 #include "envfx_snow.h"
 #include "level_geo.h"

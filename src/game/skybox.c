@@ -1,11 +1,11 @@
 #include <PR/ultratypes.h>
 
 #include "area.h"
-#include "engine/math_util.h"
+#include "math_util.h"
 #include "geo_misc.h"
 #include "gfx_dimensions.h"
 #include "level_update.h"
-#include "memory.h"
+#include "init/memory.h"
 #include "save_file.h"
 #include "segment2.h"
 #include "sm64.h"

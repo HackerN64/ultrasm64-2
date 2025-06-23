@@ -4,7 +4,6 @@
 
 #include "macros.inc"
 #include <PR/rcp.h>
-
 #define PHYS_TO_CART(addr) ((addr) | 0xB0000000)
 .equ CART_ENTRYPOINT, 0x00000008
 .equ CART_CHECKSUM0, 0x00000010
@@ -38,7 +37,7 @@
 // 0xA4000000-0xA4000FFF: RSP DMEM
 
 .section .text, "ax"
-
+#ifndef LIBDRAGON_IPL3
 // 0xA4000040-0xA4000B6F: IPL3
 
 // IPL3 entry point jumped to from IPL2
@@ -1158,3 +1157,7 @@ func_A4000AD0:
 #endif
 
 .end ipl3_entry
+#else
+.section .text, "ax"
+.incbin "asm/libdragon_ipl3.bin"
+#endif

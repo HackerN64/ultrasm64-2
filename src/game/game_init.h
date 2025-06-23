@@ -7,7 +7,7 @@
 #include <PR/os_message.h>
 
 #include "types.h"
-#include "memory.h"
+#include "init/memory.h"
 
 #define GFX_POOL_SIZE 6400 // Size of how large the master display list (gDisplayListHead) can be
 

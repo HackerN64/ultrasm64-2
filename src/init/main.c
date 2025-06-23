@@ -3,15 +3,15 @@
 
 #include "sm64.h"
 #include "audio/external.h"
-#include "game_init.h"
+#include "game/game_init.h"
 #include "memory.h"
-#include "sound_init.h"
-#include "profiler.h"
+#include "game/sound_init.h"
+#include "game/profiler.h"
 #include "buffers/buffers.h"
 #include "segments.h"
 #include "segment_symbols.h"
 #include "main.h"
-#include "rumble_init.h"
+#include "game/rumble_init.h"
 
 // Message IDs
 #define MESG_SP_COMPLETE 100
@@ -40,6 +40,8 @@ OSMesg gPIMesgBuf[32];
 OSMesg gSIEventMesgBuf[1];
 OSMesg gIntrMesgBuf[16];
 OSMesg gUnknownMesgBuf[16];
+
+//u32 bootTime = 0;
 
 struct VblankHandler *gVblankHandler1 = NULL;
 struct VblankHandler *gVblankHandler2 = NULL;
@@ -334,7 +336,10 @@ extern void crash_screen_init(void);
 void thread3_main(UNUSED void *arg) {
     setup_mesg_queues();
     alloc_pool();
+#ifndef LIBDRAGON_IPL3
     load_engine_code_segment();
+#endif
+    //bootTime = osGetCount();
 
     crash_screen_init();
 

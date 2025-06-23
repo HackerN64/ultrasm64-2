@@ -183,6 +183,35 @@ int __ucmpdi2(unsigned long long a, unsigned long long b) {
     return (a < b) ? 0 : 2;
 }
 
+// Taken from LLVM
+
+typedef union {
+    u64 all;
+    struct {
+        u32 high;
+        u32 low;
+    } s;
+} UdWords;
+
+s64 __lshrdi3(s64 a, s32 b) {
+    const s32 bits_in_word = (s32)(sizeof(s32) * 8);
+    UdWords input;
+    UdWords result;
+    input.all = a;
+    if (b & bits_in_word)  /* bits_in_word <= b < bits_in_dword */ {
+        result.s.high = 0;
+        result.s.low = input.s.high >> (b - bits_in_word);
+    } else  /* 0 <= b < bits_in_word */ {
+        if (b == 0) {
+            return a;
+        }
+
+        result.s.high  = input.s.high >> b;
+        result.s.low = (input.s.high << (bits_in_word - b)) | (input.s.low >> b);
+    }
+    return result.all;
+}
+
 // Compute division and modulo of 64-bit signed and unsigned integers
 
 __asm__("                                   \n\
