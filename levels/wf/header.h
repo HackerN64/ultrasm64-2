@@ -2,7 +2,7 @@
 #define WF_HEADER_H
 
 #include "types.h"
-#include "engine/moving_texture.h"
+#include "game/moving_texture.h"
 
 // geo
 extern const GeoLayout wf_geo_0007E0[];

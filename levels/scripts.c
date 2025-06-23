@@ -1,8 +1,8 @@
 #include <ultra64.h>
 #include "sm64.h"
-#include "engine/level_update.h"
+#include "game/level_update.h"
 #include "level_commands.h"
-#include "engine/area.h"
+#include "game/area.h"
 
 #include "make_const_nonconst.h"
 

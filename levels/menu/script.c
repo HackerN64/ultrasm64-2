@@ -6,8 +6,8 @@
 #include "segment_symbols.h"
 #include "level_commands.h"
 
-#include "engine/area.h"
-#include "engine/level_update.h"
+#include "game/area.h"
+#include "game/level_update.h"
 #include "menu/file_select.h"
 #include "menu/star_select.h"
 

@@ -3,8 +3,8 @@
 
 #include <PR/ultratypes.h>
 
-#include "engine/save_file.h"
-#include "engine/game_init.h"
+#include "game/save_file.h"
+#include "game/game_init.h"
 #include "config.h"
 
 extern u8 gAudioHeap[];

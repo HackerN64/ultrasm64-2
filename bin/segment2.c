@@ -4,7 +4,7 @@
 #include "config.h"
 #include "macros.h"
 #include "types.h"
-#include "engine/ingame_menu.h"
+#include "game/ingame_menu.h"
 
 #include "make_const_nonconst.h"
 

@@ -2,8 +2,8 @@
 #define CASTLE_INSIDE_HEADER_H
 
 #include "types.h"
-#include "engine/paintings.h"
-#include "engine/moving_texture.h"
+#include "game/paintings.h"
+#include "game/moving_texture.h"
 
 // geo
 extern const GeoLayout castle_geo_000F00[];

@@ -47,8 +47,8 @@ SECTIONS
     {
         BUILD_DIR/asm/entry.o(.text);
         BUILD_DIR/asm/decompress.o(.text*);
-        BUILD_DIR/src/game/dma_async.o(.text);
-        BUILD_DIR/src/game*.o(.text);
+        BUILD_DIR/src/init/dma_async.o(.text);
+        BUILD_DIR/src/init*.o(.text);
         AUDIO_DIR*.o(.text);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
         BUILD_DIR/src/audio/external.o(.text);
@@ -56,8 +56,8 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.data*);
         BUILD_DIR/asm/decompress.o(.data*);
-        BUILD_DIR/src/game/dma_async.o(.data);
-        BUILD_DIR/src/game*.o(.data*);
+        BUILD_DIR/src/init/dma_async.o(.data);
+        BUILD_DIR/src/init*.o(.data*);
         AUDIO_DIR*.o(.data*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
         BUILD_DIR/src/audio/external.o(.data*);
@@ -65,16 +65,16 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.rodata*);
         BUILD_DIR/asm/decompress.o(.rodata*);
-        BUILD_DIR/src/game/dma_async.o(.rodata);
-        BUILD_DIR/src/game*.o(.rodata*);
+        BUILD_DIR/src/init/dma_async.o(.rodata);
+        BUILD_DIR/src/init*.o(.rodata*);
         AUDIO_DIR*.o(.rodata*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
         BUILD_DIR/src/audio/external.o(.rodata*);
         BUILD_DIR/lib/rsp.o(.rodata*);
 #ifdef LIBDRAGON_IPL3
-        BUILD_DIR/src/engine*.o(.text);
-        BUILD_DIR/src/engine*.o(.data*);
-        BUILD_DIR/src/engine*.o(.rodata*);
+        BUILD_DIR/src/game*.o(.text);
+        BUILD_DIR/src/game*.o(.data*);
+        BUILD_DIR/src/game*.o(.rodata*);
 #endif
         . = ALIGN(0x10);
     }
@@ -82,7 +82,7 @@ SECTIONS
 
     BEGIN_NOLOAD(main)
     {
-        BUILD_DIR/src/game*.o(.bss*);
+        BUILD_DIR/src/init*.o(.bss*);
 #ifdef VERSION_SH
         AUDIO_DIR/port.o(.bss*);
 #endif
@@ -94,7 +94,7 @@ SECTIONS
         AUDIO_DIR*.o(.bss*);
         BUILD_DIR/src/audio/external.o(.bss*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
-        BUILD_DIR/src/engine*.o(.bss*);
+        BUILD_DIR/src/game*.o(.bss*);
         . = ALIGN(0x10);
     }
     END_NOLOAD(main)
@@ -111,9 +111,9 @@ SECTIONS
 #ifndef LIBDRAGON_IPL3
     BEGIN_SEG(engine, .)
     {
-        BUILD_DIR/src/engine*.o(.text);
-        BUILD_DIR/src/engine*.o(.data*);
-        BUILD_DIR/src/engine*.o(.rodata*);
+        BUILD_DIR/src/game*.o(.text);
+        BUILD_DIR/src/game*.o(.data*);
+        BUILD_DIR/src/game*.o(.rodata*);
         . = ALIGN(0x40);
     }
     END_SEG(engine)

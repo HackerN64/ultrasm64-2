@@ -25,9 +25,9 @@
 #include "sh/synthesis.h"
 #endif
 #include "external.h"
-#include "engine/level_update.h"
-#include "engine/object_list_processor.h"
-#include "engine/camera.h"
+#include "game/level_update.h"
+#include "game/object_list_processor.h"
+#include "game/camera.h"
 #include "seq_ids.h"
 #include "dialog_ids.h"
 
