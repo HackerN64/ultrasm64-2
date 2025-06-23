@@ -89,7 +89,7 @@ endif
 
 NON_MATCHING := 1
 MIPSISET     := -mips3
-OPT_FLAGS    := -O2
+OPT_FLAGS    := -Os
 
 
 # NON_MATCHING - whether to build a matching, identical copy of the ROM
@@ -586,43 +586,6 @@ $(BUILD_DIR)/include/level_headers.h: levels/level_headers.h.in
 #==============================================================================#
 # Compilation Recipes                                                          #
 #==============================================================================#
-
-# Alternate compiler flags needed for matching
-ifeq ($(NON_MATCHING),0)
-  $(BUILD_DIR)/levels/%/leveldata.o: OPT_FLAGS := -g
-  $(BUILD_DIR)/actors/%.o:           OPT_FLAGS := -g
-  $(BUILD_DIR)/bin/%.o:              OPT_FLAGS := -g
-  $(BUILD_DIR)/src/goddard/%.o:      OPT_FLAGS := -g
-  $(BUILD_DIR)/src/goddard/%.o:      MIPSISET := -mips1
-
-  # Audio specific flags:
-
-  # For EU, all audio files other than external.c and port.c put string literals
-  # in .data. (In Shindou, the port.c string literals also moved to .data.)
-  $(BUILD_DIR)/src/audio/eu/%.o:          OPT_FLAGS := -O2 -use_readwrite_const
-  $(BUILD_DIR)/src/audio/eu/port.o:       OPT_FLAGS := -O2
-
-  # US/JP disable loop unrolling and enable -framepointer for one file.
-  $(BUILD_DIR)/src/audio/us_jp/%.o:         OPT_FLAGS := -O2 -Wo,-loopunroll,0
-  $(BUILD_DIR)/src/audio/us_jp/load.o:      OPT_FLAGS := -O2 -Wo,-loopunroll,0 -framepointer
-
-  # The source-to-source optimizer copt is enabled for US/JP audio. This makes it use
-  # acpp, which needs -Wp,-+ to handle C++-style comments.
-  # All other files than external.c should really use copt, but only a few have
-  # been matched so far.
-  $(BUILD_DIR)/src/audio/us_jp/effects.o:   OPT_FLAGS := -O2 -Wo,-loopunroll,0 -sopt,-inline=sequence_channel_process_sound,-scalaroptimize=1 -Wp,-+
-  $(BUILD_DIR)/src/audio/us_jp/synthesis.o: OPT_FLAGS := -O2 -Wo,-loopunroll,0 -sopt,-scalaroptimize=1 -Wp,-+
-
-  $(BUILD_DIR)/src/audio/external.o:        OPT_FLAGS := -O2 -Wo,-loopunroll,0
-
-# Add a target for build/eu/src/audio/*.copt to make it easier to see debug
-$(BUILD_DIR)/src/audio/%.acpp: src/audio/%.c
-	$(ACPP) $(TARGET_CFLAGS) $(DEF_INC_CFLAGS) -D__sgi -+ $< > $@
-$(BUILD_DIR)/src/audio/%.copt: $(BUILD_DIR)/src/audio/%.acpp
-	$(COPT) -signed -I=$< -CMP=$@ -cp=i -scalaroptimize=1 $(COPTFLAGS)
-$(BUILD_DIR)/src/audio/%/seqplayer.copt: COPTFLAGS := -inline_manual
-
-endif
 
 # Compile C code
 $(BUILD_DIR)/%.o: %.c
