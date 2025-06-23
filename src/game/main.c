@@ -334,7 +334,9 @@ extern void crash_screen_init(void);
 void thread3_main(UNUSED void *arg) {
     setup_mesg_queues();
     alloc_pool();
+#ifndef LIBDRAGON_IPL3
     load_engine_code_segment();
+#endif
 
     crash_screen_init();
 

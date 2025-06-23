@@ -60,7 +60,7 @@ SECTIONS
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
         BUILD_DIR/src/audio/external.o(.data*);
         BUILD_DIR/lib/rsp.o(.data*);
-        
+
         BUILD_DIR/asm/entry.o(.rodata*);
         BUILD_DIR/asm/decompress.o(.rodata*);
         BUILD_DIR/src/game*.o(.rodata*);
@@ -68,6 +68,11 @@ SECTIONS
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
         BUILD_DIR/src/audio/external.o(.rodata*);
         BUILD_DIR/lib/rsp.o(.rodata*);
+#ifdef LIBDRAGON_IPL3
+        BUILD_DIR/src/engine*.o(.text);
+        BUILD_DIR/src/engine*.o(.data*);
+        BUILD_DIR/src/engine*.o(.rodata*);
+#endif
         . = ALIGN(0x10);
     }
     END_SEG(main)
@@ -93,8 +98,14 @@ SECTIONS
 
     CREATE_LO_HI_PAIR(_mainSegmentNoloadSize, SIZEOF (.main.noload))
     . = _mainSegmentNoloadEnd;
-    . = ALIGN(0x10);
 
+#ifndef LIBDRAGON_IPL3
+    . = ALIGN(0x10);
+#else
+    . = ALIGN(0x40);
+#endif
+
+#ifndef LIBDRAGON_IPL3
     BEGIN_SEG(engine, .)
     {
         BUILD_DIR/src/engine*.o(.text);
@@ -105,6 +116,7 @@ SECTIONS
     END_SEG(engine)
 
     . = _engineSegmentEnd;
+#endif
 
     BEGIN_NOLOAD(framebuffers)
     {
@@ -338,7 +350,11 @@ SECTIONS
     }
 
     ASSERT((_goddardSegmentNoloadEnd <= SEG_POOL_START + POOL_SIZE), "Error: menu segment extended past pool end")
+#ifndef LIBDRAGON_IPL3
     ASSERT((_mainSegmentNoloadEnd <= _engineSegmentStart), "Error: main segment extended into engine.")
     ASSERT((_engineSegmentEnd <= _framebuffersSegmentNoloadStart), "Error: engine segment extended into framebuffers.")
+#else
+    ASSERT((_mainSegmentNoloadEnd <= _framebuffersSegmentNoloadStart), "Error: main segment extended into framebuffers.")
+#endif
     ASSERT((_framebuffersSegmentNoloadEnd <= RAM_END), "Error: framebuffers segment extended past RDRAM end")
 }

@@ -370,6 +370,7 @@ void *load_segment_decompress_heap(u32 segment, u8 *srcStart, u8 *srcEnd) {
     return gDecompressionHeap;
 }
 
+#ifndef LIBDRAGON_IPL3
 void load_engine_code_segment(void) {
     void *startAddr = (void *) _engineSegmentStart;
     u32 totalSize = _engineSegmentEnd - _engineSegmentStart;
@@ -381,6 +382,7 @@ void load_engine_code_segment(void) {
     osInvalICache(startAddr, totalSize);
     osInvalDCache(startAddr, totalSize);
 }
+#endif
 #endif
 
 /**
