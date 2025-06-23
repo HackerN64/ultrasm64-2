@@ -17,7 +17,9 @@ SECTIONS
     {
         BUILD_DIR/asm/rom_header.o(.text);
         BUILD_DIR/asm/boot.o(.text);
+#ifndef LIBDRAGON_IPL3
         BUILD_DIR/asm/ipl3_font.o(.text);
+#endif
     }
     END_SEG(boot)
 

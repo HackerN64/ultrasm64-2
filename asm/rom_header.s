@@ -16,7 +16,7 @@
     .fill 0x30
 #else
 
-.word  0x4EAA3D0E               /* Checksum 1 */
+.word  _mainSegmentRomEnd       /* Checksum 1 / Libdragon IPL3 load end */
 .word  0x74757C24               /* Checksum 2 */
 .word  0x00000000               /* Unknown */
 .word  0x00000000               /* Unknown */

@@ -5,8 +5,18 @@ include util.mk
 # Default target
 default: all
 
+# Use Libdragon IPL3
+# WARNING: This CAN and WILL break certain (most) emulators.
+# Use if you care about console or ares boot times.
+
+LIBDRAGON_IPL3 := 0
+
 # Preprocessor definitions
 DEFINES :=
+
+ifeq ($(LIBDRAGON_IPL3), 1)
+  DEFINES += LIBDRAGON_IPL3=1
+endif
 
 #==============================================================================#
 # Build Options                                                                #
@@ -111,7 +121,7 @@ ifeq ($(filter $(TARGET_STRING), sm64.jp.f3d_old sm64.us.f3d_old sm64.eu.f3d_new
 endif
 
 # Whether to hide commands or not
-VERBOSE ?= 1
+VERBOSE ?= 0
 ifeq ($(VERBOSE),0)
   V := @
 endif
@@ -125,15 +135,10 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   $(info Version:        $(VERSION))
   $(info Microcode:      $(GRUCODE))
   $(info Target:         $(TARGET))
-  ifeq ($(COMPARE),1)
-    $(info Compare ROM:    yes)
+  ifeq ($(LIBDRAGON_IPL3),1)
+    $(info IPL:            Libdragon IPL3 Compat)
   else
-    $(info Compare ROM:    no)
-  endif
-  ifeq ($(NON_MATCHING),1)
-    $(info Build Matching: no)
-  else
-    $(info Build Matching: yes)
+    $(info IPL:            Nintendo IPL3)
   endif
   $(info =======================)
 endif
@@ -657,8 +662,12 @@ $(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG
 
 $(ROM): $(ELF)
 	$(call print,Building ROM:,$<,$@)
+ifeq ($(LIBDRAGON_IPL3), 0)
 	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $(@:.z64=.bin) -O binary
 	$(V)$(N64CKSUM) $(@:.z64=.bin) $@
+else
+	$(V)$(OBJCOPY) $(PAD_TO_GAP_FILL) $< $@ -O binary
+endif
 
 $(BUILD_DIR)/$(TARGET).objdump: $(ELF)
 	$(OBJDUMP) -D $< > $@
