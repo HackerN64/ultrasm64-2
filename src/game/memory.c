@@ -305,6 +305,10 @@ void *load_to_fixed_pool_addr(u8 *destAddr, u8 *srcStart, u8 *srcEnd) {
     u32 srcSize = ALIGN16(srcEnd - srcStart);
     u32 destSize = ALIGN16((u8 *) sPoolListHeadR - destAddr);
 
+    if (destAddr == _goddardSegmentStart) { // Clear goddard bss
+        bzero((u8 *) _goddardSegmentNoloadStart,  (u8 *) _goddardSegmentNoloadEnd - (u8 *) _goddardSegmentNoloadStart);
+    }
+
     if (srcSize <= destSize) {
         dest = main_pool_alloc(destSize, MEMORY_POOL_RIGHT);
         if (dest != NULL) {
