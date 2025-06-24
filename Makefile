@@ -219,6 +219,7 @@ SRC_DIRS := src src/game src/init src/menu src/buffers src/audio $(AUDIO_SRC_DIR
 BIN_DIRS := bin bin/$(VERSION)
 
 GODDARD_SRC_DIRS := src/goddard src/goddard/dynlists
+N64LIBC_SRC_DIRS := lib/n64-libc
 
 # File dependencies and variables for specific files
 include Makefile.split
@@ -228,6 +229,7 @@ LEVEL_C_FILES     := $(wildcard levels/*/leveldata.c) $(wildcard levels/*/script
 C_FILES           := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c)) $(LEVEL_C_FILES)
 S_FILES           := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))
 GODDARD_C_FILES   := $(foreach dir,$(GODDARD_SRC_DIRS),$(wildcard $(dir)/*.c))
+N64LIBC_C_FILES   := $(foreach dir,$(N64LIBC_SRC_DIRS),$(wildcard $(dir)/*.c))
 GENERATED_C_FILES := $(BUILD_DIR)/assets/mario_anim_data.c $(BUILD_DIR)/assets/demo_data.c
 
 # Sound files
@@ -254,9 +256,10 @@ O_FILES := $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file:.c=.o)) \
            $(foreach file,$(GENERATED_C_FILES),$(file:.c=.o))
 
 GODDARD_O_FILES := $(foreach file,$(GODDARD_C_FILES),$(BUILD_DIR)/$(file:.c=.o))
+N64LIBC_O_FILES := $(foreach file,$(N64LIBC_C_FILES),$(BUILD_DIR)/$(file:.c=.o))
 
 # Automatic dependency files
-DEP_FILES := $(O_FILES:.o=.d) $(GODDARD_O_FILES:.o=.d) $(BUILD_DIR)/$(LD_SCRIPT).d
+DEP_FILES := $(O_FILES:.o=.d) $(GODDARD_O_FILES:.o=.d) $(N64LIBC_O_FILES:.o=.d) $(BUILD_DIR)/$(LD_SCRIPT).d
 
 #==============================================================================#
 # Compiler Options                                                             #
@@ -415,7 +418,7 @@ else
 endif
 $(BUILD_DIR)/bin/segment2.o: $(BUILD_DIR)/text/debug_text.raw.inc.c
 
-ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(GODDARD_SRC_DIRS) $(ULTRA_SRC_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) $(TEXT_DIRS) $(SOUND_SAMPLE_DIRS) $(addprefix levels/,$(LEVEL_DIRS)) rsp include) $(MIO0_DIR) $(addprefix $(MIO0_DIR)/,$(VERSION)) $(SOUND_BIN_DIR) $(SOUND_BIN_DIR)/sequences/$(VERSION)
+ALL_DIRS := $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SRC_DIRS) $(GODDARD_SRC_DIRS) $(N64LIBC_SRC_DIRS) $(ULTRA_SRC_DIRS) $(BIN_DIRS) $(TEXTURE_DIRS) $(TEXT_DIRS) $(SOUND_SAMPLE_DIRS) $(addprefix levels/,$(LEVEL_DIRS)) rsp include) $(MIO0_DIR) $(addprefix $(MIO0_DIR)/,$(VERSION)) $(SOUND_BIN_DIR) $(SOUND_BIN_DIR)/sequences/$(VERSION)
 
 # Make sure build directory exists before compiling anything
 DUMMY != mkdir -p $(ALL_DIRS)
@@ -612,13 +615,18 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 
 # Link libgoddard
 $(BUILD_DIR)/libgoddard.a: $(GODDARD_O_FILES)
-	@$(PRINT) "$(GREEN)Linking libgoddard:  $(BLUE)$@ $(NO_COL)\n"
+	@$(PRINT) "$(GREEN)Archiving libgoddard:  $(BLUE)$@ $(NO_COL)\n"
 	$(V)$(AR) rcs -o $@ $(GODDARD_O_FILES)
 
+# Link n64-libc
+$(BUILD_DIR)/n64-libc.a: $(N64LIBC_O_FILES)
+	@$(PRINT) "$(GREEN)Archiving n64-libc:  $(BLUE)$@ $(NO_COL)\n"
+	$(V)$(AR) rcs -o $@ $(N64LIBC_O_FILES)
+
 # Link SM64 ELF file
-$(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(BUILD_DIR)/libgoddard.a
+$(ELF): $(LIBULTRA_BUILD_DIR)/libgultra_rom.a $(O_FILES) $(MIO0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(BUILD_DIR)/libgoddard.a $(BUILD_DIR)/n64-libc.a
 	@$(PRINT) "$(GREEN)Linking ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) -L $(BUILD_DIR) -L $(LIBULTRA_BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -lgultra_rom -lgoddard
+	$(V)$(LD) -L $(BUILD_DIR) -L $(LIBULTRA_BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -lgultra_rom -lgoddard -l:n64-libc.a
 
 # Build ROM
   PAD_TO_GAP_FILL := --pad-to=0x800000 --gap-fill=0xFF
