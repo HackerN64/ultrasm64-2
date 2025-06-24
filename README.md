@@ -2,6 +2,14 @@
 
 This repository is a clean slate for basic enhancements built upon the *Super Mario 64* decompilation. It is a spritual successor to CrashOveride95's *UltraSM64*.
 
+## Added Features
+
+ * Shifting segments.
+ * No 1 MB code limit for `src/game`.
+ * A full decompilation of libultra is included in `lib/hackerlibultra`.
+ * A Nintendo 64-specific libc implementation by falcobuster is provided in `lib/n64-libc`.
+ * Libdragon's IPL3 (`LIBDRAGON_IPL3=1`) provided as an optional Makefile configuration. See Makefile for details.
+
 ## Quick Start (for Ubuntu)
 
 1. Install prerequisites: `sudo apt install -y build-essential git pkgconf python3 isl libgmp-dev libmpfr-dev libmpc-dev`
@@ -157,14 +165,14 @@ Resulting artifacts can be found in the `build` directory.
 	├── enhancements: example source modifications
 	├── include: header files
 	├── levels: level scripts, geo layout, and display lists
-	├── lib: SDK library code
+	├── lib: SDK library code, and n64-libc
 	├── rsp: audio and Fast3D RSP assembly code
 	├── sound: sequences, sound samples, and sound banks
 	├── src: C source code for game
 	│   ├── audio: audio code
 	│   ├── buffers: stacks, heaps, and task buffers
-	│   ├── engine: script processing engines and utils
-	│   ├── game: behaviors and rest of game source
+	│   ├── init: code that is guaranteed to be loaded on boot after IPL3
+	│   ├── game: loaded by init code, contains the rest of the common game code
 	│   ├── goddard: Mario intro screen
 	│   └── menu: title screen and file, act, and debug level selection menus
 	├── text: dialog, level names, act names
