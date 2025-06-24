@@ -10,7 +10,7 @@ static const Vtx leaves_seg3_vertex_0301CBA0[] = {
 
 // 0x0301CBE0
 ALIGNED8 static const Texture leaves_seg3_texture_0301CBE0[] = {
-#include "actors/leaves/leaf.rgba16.inc.c"
+#embed "actors/leaves/leaf.rgba16.bin"
 };
 
 // 0x0301CDE0 - 0x0301CE70

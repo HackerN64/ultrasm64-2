@@ -4,62 +4,62 @@ UNUSED static const u64 power_meter_unused_1 = 0;
 
 #if defined(VERSION_CN)
 ALIGNED8 static const Texture texture_power_meter_left_side[] = {
-#include "actors/power_meter/power_meter_left_side_cn.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_left_side_cn.rgba16.bin"
 };
 
 ALIGNED8 static const Texture texture_power_meter_right_side[] = {
-#include "actors/power_meter/power_meter_right_side_cn.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_right_side_cn.rgba16.bin"
 };
 #else
 // 0x030233E0
 ALIGNED8 static const Texture texture_power_meter_left_side[] = {
-#include "actors/power_meter/power_meter_left_side.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_left_side.rgba16.bin"
 };
 
 // 0x030243E0
 ALIGNED8 static const Texture texture_power_meter_right_side[] = {
-#include "actors/power_meter/power_meter_right_side.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_right_side.rgba16.bin"
 };
 #endif
 
 // 0x030253E0
 ALIGNED8 static const Texture texture_power_meter_full[] = {
-#include "actors/power_meter/power_meter_full.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_full.rgba16.bin"
 };
 
 // 0x03025BE0
 ALIGNED8 static const Texture texture_power_meter_seven_segments[] = {
-#include "actors/power_meter/power_meter_seven_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_seven_segments.rgba16.bin"
 };
 
 // 0x030263E0
 ALIGNED8 static const Texture texture_power_meter_six_segments[] = {
-#include "actors/power_meter/power_meter_six_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_six_segments.rgba16.bin"
 };
 
 // 0x03026BE0
 ALIGNED8 static const Texture texture_power_meter_five_segments[] = {
-#include "actors/power_meter/power_meter_five_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_five_segments.rgba16.bin"
 };
 
 // 0x030273E0
 ALIGNED8 static const Texture texture_power_meter_four_segments[] = {
-#include "actors/power_meter/power_meter_four_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_four_segments.rgba16.bin"
 };
 
 // 0x03027BE0
 ALIGNED8 static const Texture texture_power_meter_three_segments[] = {
-#include "actors/power_meter/power_meter_three_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_three_segments.rgba16.bin"
 };
 
 // 0x030283E0
 ALIGNED8 static const Texture texture_power_meter_two_segments[] = {
-#include "actors/power_meter/power_meter_two_segments.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_two_segments.rgba16.bin"
 };
 
 // 0x03028BE0
 ALIGNED8 static const Texture texture_power_meter_one_segments[] = {
-#include "actors/power_meter/power_meter_one_segment.rgba16.inc.c"
+#embed "actors/power_meter/power_meter_one_segment.rgba16.bin"
 };
 
 // 0x030293E0

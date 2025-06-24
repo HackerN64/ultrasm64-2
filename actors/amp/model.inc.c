@@ -1,19 +1,19 @@
 // Amp
 
 ALIGNED8 static const Texture dAmpElectricityTexture[] = {
-#include "actors/amp/amp_electricity.rgba16.inc.c"
+#embed "actors/amp/amp_electricity.rgba16.bin"
 };
 
 ALIGNED8 static const Texture dAmpEyesTexture[] = {
-#include "actors/amp/amp_eyes.rgba16.inc.c"
+#embed "actors/amp/amp_eyes.rgba16.bin"
 };
 
 ALIGNED8 static const Texture dAmpBodyTexture[] = {
-#include "actors/amp/amp_body.rgba16.inc.c"
+#embed "actors/amp/amp_body.rgba16.bin"
 };
 
 ALIGNED8 static const Texture dAmpMouthTexture[] = {
-#include "actors/amp/amp_mouth.rgba16.inc.c"
+#embed "actors/amp/amp_mouth.rgba16.bin"
 };
 
 static const Vtx dAmpElectricityVertices[] = {

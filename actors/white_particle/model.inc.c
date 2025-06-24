@@ -10,7 +10,7 @@ static const Vtx white_particle_vertex[] = {
 
 // 0x0302C6A0
 ALIGNED8 static const Texture white_particle_texture[] = {
-#include "actors/white_particle/snow_particle.rgba16.inc.c"
+#embed "actors/white_particle/snow_particle.rgba16.bin"
 };
 
 // 0x0302C8A0 - 0x0302C938

@@ -302,7 +302,7 @@ else
 endif
 
 # C compiler options
-CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS)
+CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS) $(foreach i,$(INCLUDE_DIRS),--embed-dir=$(i))
 CFLAGS += -std=gnu23 -Wno-unused-variable -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra
 CFLAGS += -Wno-missing-braces
 
@@ -392,7 +392,7 @@ $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
 
 $(BUILD_DIR)/src/audio/sh/load.o: $(SOUND_BIN_DIR)/bank_sets.inc.c $(SOUND_BIN_DIR)/sequences_header.inc.c $(SOUND_BIN_DIR)/ctl_header.inc.c $(SOUND_BIN_DIR)/tbl_header.inc.c
 
-$(CRASH_TEXTURE_C_FILES): TEXTURE_ENCODING := u32
+$(CRASH_TEXTURE_C_FILES): TEXTURE_ENCODING := raw
 
 ifeq ($(VERSION),eu)
   TEXT_DIRS := text/de text/us text/fr
@@ -432,14 +432,14 @@ $(BUILD_DIR)/src/game/ingame_menu.o: $(BUILD_DIR)/include/text_strings.h
 #==============================================================================#
 # Texture Generation                                                           #
 #==============================================================================#
-TEXTURE_ENCODING := u8
+TEXTURE_ENCODING := raw
 
 # Convert PNGs to RGBA32, RGBA16, IA16, IA8, IA4, IA1, I8, I4 binary files
 $(BUILD_DIR)/%: %.png
 	$(call print,Converting:,$<,$@)
 	$(V)$(N64GRAPHICS) -s raw -i $@ -g $< -f $(lastword $(subst ., ,$@))
 
-$(BUILD_DIR)/%.inc.c: %.png
+$(BUILD_DIR)/%.bin: %.png
 	$(call print,Converting:,$<,$@)
 	$(V)$(N64GRAPHICS) -s $(TEXTURE_ENCODING) -i $@ -g $< -f $(lastword ,$(subst ., ,$(basename $<)))
 

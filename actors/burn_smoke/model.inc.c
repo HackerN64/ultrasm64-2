@@ -13,7 +13,7 @@ static const Vtx burn_smoke_seg4_vertex_040217C0[] = {
 //     burn smoke, but mistakened for being intended as black smoke.
 // 0x04021800
 ALIGNED8 static const Texture burn_smoke_seg4_texture_04021800[] = {
-#include "actors/burn_smoke/burn_smoke.ia16.inc.c"
+#embed "actors/burn_smoke/burn_smoke.ia16.bin"
 };
 
 // 0x04022000 - 0x04022028

@@ -10,7 +10,7 @@ static const Lights1 book_seg5_lights_05002558 = gdSPDefLights1(
 
 // 0x05002570
 ALIGNED8 static const Texture book_seg5_texture_05002570[] = {
-#include "actors/book/book_cover.rgba16.inc.c"
+#embed "actors/book/book_cover.rgba16.bin"
 };
 
 // 0x05002D70

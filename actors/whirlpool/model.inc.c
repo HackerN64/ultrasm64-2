@@ -2,7 +2,7 @@
 
 // 0x05012848
 ALIGNED8 static const Texture whirlpool_seg5_texture_05012848[] = {
-#include "actors/whirlpool/whirlpool.ia16.inc.c"
+#embed "actors/whirlpool/whirlpool.ia16.bin"
 };
 
 // 0x05013848

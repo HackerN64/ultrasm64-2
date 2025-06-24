@@ -14,7 +14,7 @@ UNUSED static const u64 chain_ball_unused_1 = 0;
 
 // 0x06020AE8
 ALIGNED8 static const Texture chain_ball_seg6_texture_06020AE8[] = {
-#include "actors/chain_ball/chain_ball.rgba16.inc.c"
+#embed "actors/chain_ball/chain_ball.rgba16.bin"
 };
 
 // 0x060212E8 - 0x06021380

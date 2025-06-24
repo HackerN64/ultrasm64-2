@@ -6408,12 +6408,12 @@ static const Vtx intro_seg7_vertex_07007DF0[] = {
 
 // 0x07007EA0 - 0x07007EA2
 ALIGNED8 static const Texture intro_seg7_texture_0[] = {
-#include "levels/intro/0.rgba16.inc.c"
+#embed "levels/intro/0.rgba16.bin"
 };
 
 // 0x070086A0 - 0x070086A2
 ALIGNED8 static const Texture intro_seg7_texture_1[] = {
-#include "levels/intro/1.rgba16.inc.c"
+#embed "levels/intro/1.rgba16.bin"
 };
 
 #if defined(VERSION_CN)
@@ -8667,42 +8667,42 @@ static const Vtx intro_seg7_vertex_tm[] = {
 #if defined(VERSION_EU) || defined(VERSION_SH)
 // 0x0700B4A0 - 0x0700B4A2
 ALIGNED8 static const Texture intro_seg7_texture_copyright[] = {
-#include "levels/intro/2_eu_copyright.rgba16.inc.c"
+#embed "levels/intro/2_eu_copyright.rgba16.bin"
 };
 
 #elif defined(VERSION_CN)
 // 0x0700B920 - 0x0700C920
 ALIGNED8 static const Texture intro_seg7_texture_copyright[] = {
-#include "levels/intro/2_cn_copyright.rgba16.inc.c"
+#embed "levels/intro/2_cn_copyright.rgba16.bin"
 };
 
 // 0x0700C920 - 0x0700D920
 ALIGNED8 static const Texture intro_seg7_texture_copyright_ique[] = {
-#include "levels/intro/2_cn_copyright_ique.rgba16.inc.c"
+#embed "levels/intro/2_cn_copyright_ique.rgba16.bin"
 };
 
 #else
 // 0x0700B4A0 - 0x0700B4A2
 ALIGNED8 static const Texture intro_seg7_texture_copyright[] = {
-#include "levels/intro/2_copyright.rgba16.inc.c"
+#embed "levels/intro/2_copyright.rgba16.bin"
 };
 #endif
 
 #if defined(VERSION_EU)
 // 0x0700C4A0 - 0x0700D4A0
 ALIGNED8 static const u8 intro_seg7_texture_tm[] = {
-#include "levels/intro/3_eu_tm.rgba16.inc.c"
+#embed "levels/intro/3_eu_tm.rgba16.bin"
 };
 
 #elif defined(VERSION_SH) || defined(VERSION_CN)
 ALIGNED8 static const u8 intro_seg7_texture_tm[] = {
-#include "levels/intro/3_sh_tm.rgba16.inc.c"
+#embed "levels/intro/3_sh_tm.rgba16.bin"
 };
 
 #else
 // 0x0700C4A0 - 0x0700D4A0
 ALIGNED8 static const Texture intro_seg7_texture_tm[] = {
-#include "levels/intro/3_tm.rgba16.inc.c"
+#embed "levels/intro/3_tm.rgba16.bin"
 };
 #endif
 

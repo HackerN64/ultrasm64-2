@@ -10,7 +10,7 @@ static const Vtx sand_seg3_vertex_0302BA90[] = {
 
 // 0x0302BAD0
 ALIGNED8 static const Texture sand_seg3_texture_0302BAD0[] = {
-#include "actors/sand/sand_particle.rgba16.inc.c"
+#embed "actors/sand/sand_particle.rgba16.bin"
 };
 
 // 0x0302BCD0 - 0x0302BD60
