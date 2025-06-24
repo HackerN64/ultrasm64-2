@@ -52,7 +52,7 @@ SECTIONS
         AUDIO_DIR*.o(.text);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
         BUILD_DIR/src/audio/external.o(.text);
-        BUILD_DIR/n64-libc.a*:.o(.text);
+        BUILD_DIR/n64-libc.a:*.o(.text);
         BUILD_DIR/lib/rsp.o(.text);
 
         BUILD_DIR/asm/entry.o(.data*);
@@ -62,7 +62,7 @@ SECTIONS
         AUDIO_DIR*.o(.data*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.data*);
         BUILD_DIR/src/audio/external.o(.data*);
-        BUILD_DIR/n64-libc.a*:.o(.data*);
+        BUILD_DIR/n64-libc.a:*.o(.data*);
         BUILD_DIR/lib/rsp.o(.data*);
 
         BUILD_DIR/asm/entry.o(.rodata*);
@@ -72,7 +72,7 @@ SECTIONS
         AUDIO_DIR*.o(.rodata*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.rodata*);
         BUILD_DIR/src/audio/external.o(.rodata*);
-        BUILD_DIR/n64-libc.a*:.o(.rodata*);
+        BUILD_DIR/n64-libc.a:*.o(.rodata*);
         BUILD_DIR/lib/rsp.o(.rodata*);
 #ifdef LIBDRAGON_IPL3
         BUILD_DIR/src/game*.o(.text);
@@ -96,7 +96,7 @@ SECTIONS
         AUDIO_DIR/data.o(.bss*);
         AUDIO_DIR*.o(.bss*);
         BUILD_DIR/src/audio/external.o(.bss*);
-        BUILD_DIR/n64-libc.a*:.o(.bss*);
+        BUILD_DIR/n64-libc.a:*.o(.bss*);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.bss*);
         BUILD_DIR/src/game*.o(.bss*);
         . = ALIGN(0x10);

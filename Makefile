@@ -284,7 +284,7 @@ ifeq ($(TARGET_N64),1)
   CC_CFLAGS := -fno-builtin
 endif
 
-INCLUDE_DIRS := include $(BUILD_DIR) $(BUILD_DIR)/include src .
+INCLUDE_DIRS := include $(BUILD_DIR) $(BUILD_DIR)/include src lib/n64-libc .
 ifeq ($(TARGET_N64),1)
   INCLUDE_DIRS += include/gcc
 endif

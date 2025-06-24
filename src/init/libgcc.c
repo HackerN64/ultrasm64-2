@@ -5,6 +5,8 @@
 /* This file is NOT a part of the original game and only exists to help gcc work.  */
 /* --------------------------------------------------------------------------------*/
 
+// Frankenstein monster because GCC wants to ruin our lives.
+
 #include <ultra64.h>
 
 // Self-hosted libc memory functions, gcc assumes these exist even in a freestanding
@@ -210,6 +212,86 @@ s64 __lshrdi3(s64 a, s32 b) {
         result.s.low = (input.s.high << (bits_in_word - b)) | (input.s.low >> b);
     }
     return result.all;
+}
+
+#define arith64_u64 unsigned long long int
+#define arith64_s64 signed long long int
+#define arith64_u32 unsigned int
+#define arith64_s32 int
+
+typedef union
+{
+    arith64_u64 u64;
+    arith64_s64 s64;
+    struct
+    {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        arith64_u32 hi; arith64_u32 lo;
+#else
+        arith64_u32 lo; arith64_u32 hi;
+#endif
+    } u32;
+    struct
+    {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        arith64_s32 hi; arith64_s32 lo;
+#else
+        arith64_s32 lo; arith64_s32 hi;
+#endif
+    } s32;
+} arith64_word;
+
+// extract hi and lo 32-bit words from 64-bit value
+#define arith64_hi(n) (arith64_word){.u64=n}.u32.hi
+#define arith64_lo(n) (arith64_word){.u64=n}.u32.lo
+
+// Negate a if b is negative, via invert and increment.
+#define arith64_neg(a, b) (((a) ^ ((((arith64_s64)(b)) >= 0) - 1)) + (((arith64_s64)(b)) < 0))
+#define arith64_abs(a) arith64_neg(a, a)
+
+// Return the absolute value of a.
+// Note LLINT_MIN cannot be negated.
+arith64_s64 __absvdi2(arith64_s64 a)
+{
+    return arith64_abs(a);
+}
+
+// Return the result of shifting a left by b bits.
+arith64_s64 __ashldi3(arith64_s64 a, int b)
+{
+    arith64_word w = {.s64 = a};
+
+    b &= 63;
+
+    if (b >= 32)
+    {
+        w.u32.hi = w.u32.lo << (b - 32);
+        w.u32.lo = 0;
+    } else if (b)
+    {
+        w.u32.hi = (w.u32.lo >> (32 - b)) | (w.u32.hi << b);
+        w.u32.lo <<= b;
+    }
+    return w.s64;
+}
+
+// Return the result of arithmetically shifting a right by b bits.
+arith64_s64 __ashrdi3(arith64_s64 a, int b)
+{
+    arith64_word w = {.s64 = a};
+
+    b &= 63;
+
+    if (b >= 32)
+    {
+        w.s32.lo = w.s32.hi >> (b - 32);
+        w.s32.hi >>= 31; // 0xFFFFFFFF or 0
+    } else if (b)
+    {
+        w.u32.lo = (w.u32.hi << (32 - b)) | (w.u32.lo >> b);
+        w.s32.hi >>= b;
+    }
+    return w.s64;
 }
 
 // Compute division and modulo of 64-bit signed and unsigned integers
