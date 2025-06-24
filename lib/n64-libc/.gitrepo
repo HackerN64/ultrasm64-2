@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://gitlab.com/mpharoah/n64-libc
+	branch = main
+	commit = 70270d60f9b13d3cd896eaa8aa0a043992a823fd
+	parent = 4c89989f6f2ef03e71fc89e33e4e94fa067fda04
+	method = merge
+	cmdver = 0.4.9
