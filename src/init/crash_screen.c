@@ -17,7 +17,7 @@ u8 gCrashScreenCharToGlyph[128] = {
 };
 
 // A height of seven pixels for each Character * nine rows of characters + one row unused.
-u32 gCrashScreenFont[7 * 9 + 1] = {
+u32 gCrashScreenFont[] = {
     #embed "textures/crash_screen/crash_screen_font.ia1.bin"
 };
 

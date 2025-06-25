@@ -124,17 +124,20 @@ struct Object *spawn_star(struct Object *star, f32 homeX, f32 homeY, f32 homeZ) 
 }
 
 void spawn_default_star(f32 homeX, f32 homeY, f32 homeZ) {
-    struct Object *star = spawn_star(star, homeX, homeY, homeZ);
+    struct Object *star = NULL;
+    spawn_star(star, homeX, homeY, homeZ);
     star->oBhvParams2ndByte = 0;
 }
 
 void spawn_red_coin_cutscene_star(f32 homeX, f32 homeY, f32 homeZ) {
-    struct Object *star = spawn_star(star, homeX, homeY, homeZ);
+    struct Object *star = NULL;
+    spawn_star(star, homeX, homeY, homeZ);
     star->oBhvParams2ndByte = 1;
 }
 
 void spawn_no_exit_star(f32 homeX, f32 homeY, f32 homeZ) {
-    struct Object *star = spawn_star(star, homeX, homeY, homeZ);
+    struct Object *star = NULL;
+    spawn_star(star, homeX, homeY, homeZ);
     star->oBhvParams2ndByte = 1;
     star->oInteractionSubtype |= INT_SUBTYPE_NO_EXIT;
 }
