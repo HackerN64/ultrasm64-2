@@ -9,6 +9,7 @@ This repository is a clean slate for basic enhancements built upon the *Super Ma
  * A full decompilation of libultra is included in `lib/hackerlibultra`.
  * A Nintendo 64-specific libc implementation by falcobuster is provided in `lib/n64-libc`.
  * Libdragon's IPL3 (`LIBDRAGON_IPL3=1`) provided as an optional Makefile configuration. See Makefile for details.
+ * `libpl2` provided in `lib/libpl2`, allowing for Parallel Launcher-specific enhancements.
 
 ## Quick Start (for Ubuntu)
 
@@ -165,7 +166,7 @@ Resulting artifacts can be found in the `build` directory.
 	├── enhancements: example source modifications
 	├── include: header files
 	├── levels: level scripts, geo layout, and display lists
-	├── lib: SDK library code, and n64-libc
+	├── lib: SDK library code, n64-libc, libpl2, and RSP microcode binaries
 	├── rsp: audio and Fast3D RSP assembly code
 	├── sound: sequences, sound samples, and sound banks
 	├── src: C source code for game
