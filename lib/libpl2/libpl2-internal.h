@@ -56,7 +56,7 @@ volatile const __lpl2_response *__lpl2_query_string( unsigned short commandId, c
 volatile const __lpl2_response *__lpl2_query_byte( unsigned short commandId, unsigned char arg ) __attribute__((returns_nonnull));
 volatile const __lpl2_response *__lpl2_query_uint( unsigned short commandId, unsigned int arg ) __attribute__((returns_nonnull));
 
-inline __attribute__((always_inline, assume_aligned(4), const)) volatile char *__lpl2_payload_start() { return (volatile char*)0xbffb0004u; }
+static inline __attribute__((always_inline, assume_aligned(4), const)) volatile char *__lpl2_payload_start() { return (volatile char*)0xbffb0004u; }
 volatile const __lpl2_response *__lpl2_payload_send( unsigned short commandId, unsigned short payloadSize ) __attribute__((returns_nonnull));
 
 #ifdef __cplusplus

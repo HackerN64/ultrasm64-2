@@ -163,7 +163,7 @@ lpl2_bool lpl2_get_rhdc_avatar_async( const char *username, lpl2_avatar_options 
  * 
  * @since LPL_ABI_VERSION_7
  */
-inline lpl2_bool __attribute__((warning("Use of blocking libpl call will likely cause the emulator to stutter. Use the async version of the libpl call for a better user experience."), access(write_only, 3), access(write_only, 4))) lpl2_get_rhdc_avatar_blocking( const char *username, lpl2_avatar_options options, void *avatar, lpl2_err *err ) {
+static inline lpl2_bool __attribute__((warning("Use of blocking libpl call will likely cause the emulator to stutter. Use the async version of the libpl call for a better user experience."), access(write_only, 3), access(write_only, 4))) lpl2_get_rhdc_avatar_blocking( const char *username, lpl2_avatar_options options, void *avatar, lpl2_err *err ) {
 	lpl2_err e = LPL2_ERR_WAIT;
 	while( e == LPL2_ERR_WAIT ) lpl2_get_rhdc_avatar_async( username, options, avatar, &e );
 	if( err ) *err = e;

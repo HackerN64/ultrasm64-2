@@ -24,7 +24,7 @@ typedef struct {
  * Returns zero if both versions are the same. \n
  * Returns a positive number if the first version is later than the second version.
  */
-inline int __attribute__((pure, warn_unused_result)) lpl2_compare_versions( const lpl2_version *first, const lpl2_version *second ) {
+static inline int __attribute__((pure, warn_unused_result)) lpl2_compare_versions( const lpl2_version *first, const lpl2_version *second ) {
 	int cmp = (int)first->major - (int)second->major;
 	if( cmp != 0 ) return cmp;
 	cmp = (int)first->minor - (int)second->minor;
