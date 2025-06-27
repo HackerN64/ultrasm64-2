@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://gitlab.com/parallel-launcher/libpl2
+	branch = master
+	commit = 58e4fa38badf31b732f853ab15689a55db65f3d2
+	parent = 221c63e659988b7f37df82bd4897dc08fa70e82a
+	method = merge
+	cmdver = 0.4.9
