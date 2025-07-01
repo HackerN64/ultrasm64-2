@@ -18,15 +18,8 @@ u8 gCrashScreenCharToGlyph[128] = {
 };
 
 // A height of seven pixels for each Character * nine rows of characters + one row unused.
-ALIGNED8 u32 gCrashScreenFont[] = {
-    0x70871c30, 0x8988a250, 0x88808290, 0x88831c90, 0x888402f8, 0x88882210, 0x71cf9c10, 0xf9cf9c70,
-    0x8228a288, 0xf200a288, 0x0bc11c78, 0x0a222208, 0x8a222288, 0x71c21c70, 0x23c738f8, 0x5228a480,
-    0x8a282280, 0x8bc822f0, 0xfa282280, 0x8a28a480, 0x8bc738f8, 0xf9c89c08, 0x82288808, 0x82088808,
-    0xf2ef8808, 0x82288888, 0x82288888, 0x81c89c70, 0x8a08a270, 0x920da288, 0xa20ab288, 0xc20aaa88,
-    0xa208a688, 0x9208a288, 0x8be8a270, 0xf1cf1cf8, 0x8a28a220, 0x8a28a020, 0xf22f1c20, 0x82aa0220,
-    0x82492220, 0x81a89c20, 0x8a28a288, 0x8a28a288, 0x8a289488, 0x8a2a8850, 0x894a9420, 0x894aa220,
-    0x70852220, 0xf8011000, 0x08020800, 0x10840400, 0x20040470, 0x40840400, 0x80020800, 0xf8011000,
-    0x70800000, 0x88822200, 0x08820400, 0x108f8800, 0x20821000, 0x00022200, 0x20800020
+ALIGNED8 u8 gCrashScreenFont[] = {
+    #embed "textures/crash_screen/crash_screen_font.ia1.bin"
 };
 
 char *gCauseDesc[18] = {
@@ -83,23 +76,26 @@ void crash_screen_draw_rect(s32 x, s32 y, s32 w, s32 h) {
 }
 
 void crash_screen_draw_glyph(s32 x, s32 y, s32 glyph) {
-    const u32 *data;
+    const u8 *data;
     u16 *ptr;
     u32 bit;
     u32 rowMask;
     s32 i, j;
 
-    data = &gCrashScreenFont[glyph / 5 * 7];
+    data = &gCrashScreenFont[(glyph / 5) * 7 * 4];
     ptr = gCrashScreen.framebuffer + gCrashScreen.width * y + x;
 
     for (i = 0; i < 7; i++) {
+        rowMask = ((u32)data[0] << 24) | ((u32)data[1] << 16) |
+                  ((u32)data[2] << 8) | ((u32)data[3]);
+        data += 4;
         bit = 0x80000000U >> ((glyph % 5) * 6);
-        rowMask = *data++;
 
         for (j = 0; j < 6; j++) {
-            *ptr++ = (bit & rowMask) ? 0xffff : 1;
+            *ptr++ = (rowMask & bit) ? 0xffff : 1;
             bit >>= 1;
         }
+
         ptr += gCrashScreen.width - 6;
     }
 }
@@ -155,10 +151,10 @@ void crash_screen_print_float_reg(s32 x, s32 y, s32 regNum, void *addr) {
     exponent = ((bits & 0x7f800000U) >> 0x17) - 0x7f;
     if ((exponent >= -0x7e && exponent <= 0x7f) || bits == 0) {
         crash_screen_print(x, y, "F%02d:%.3e", regNum, *(f32 *) addr);
-        n64_printf("F%02d: %.3e    ", regNum, *(f32 *) addr);
+        n64_printf("F%02d: %.3e  ", regNum, *(f32 *) addr);
     } else {
         crash_screen_print(x, y, "F%02d:---------", regNum);
-        n64_printf("F%02d: ---------    ", regNum);
+        n64_printf("F%02d: ---------  ", regNum);
     }
 }
 
@@ -193,7 +189,7 @@ void draw_crash_screen(OSThread *thread) {
     }
 
     osWritebackDCacheAll();
-
+    n64_printf("Size of crash font: %u", sizeof(gCrashScreenFont));
     crash_screen_draw_rect(25, 20, 270, 25);
     crash_screen_print(30, 25, "THREAD:%d  (%s)", thread->id, gCauseDesc[cause]);
     crash_screen_print(30, 35, "PC:%08XH   SR:%08XH   VA:%08XH", tc->pc, tc->sr, tc->badvaddr);
