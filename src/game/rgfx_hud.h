@@ -1,11 +1,17 @@
 #pragma once
 
+#include "types.h"
+
+#define RGFX_HUD_BUFFER_SIZE 128
+#define RGFX_HUD_LAYERS      3
+
 typedef enum {
     RGFX_BOX,
     RGFX_TEXT,
     RGFX_SPRITE,
     RGFX_SCISSOR,
-    RGFX_GFX
+    RGFX_GFX,
+    RGFX_END
 } RgfxType;
 
 typedef enum {
@@ -50,3 +56,11 @@ typedef struct {
     void *parent;         // parent
     RgfxHudData d;
 } RgfxHud;
+
+RgfxHud *rgfx_hud_create_box(RgfxHud *parent, s16 x, s16 y, s16 z, s16 sX, s16 sY);
+RgfxHud *rgfx_hud_create_txt(RgfxHud *parent, s16 x, s16 y, s16 z, u8 font, char *c);
+RgfxHud *rgfx_hud_create_sprite(RgfxHud *parent, s16 x, s16 y, s16 z, s16 sX, s16 sY, u8 fmt, Texture *sprite);
+RgfxHud *rgfx_hud_create_scissor(RgfxHud *parent, s16 x, s16 y, s16 sX, s16 sY);
+RgfxHud *rgfx_hud_create_gfx(RgfxHud *parent, s16 x, s16 y, s16 z, Gfx *gfx);
+
+void rgfx_hud_draw();
