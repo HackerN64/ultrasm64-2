@@ -207,8 +207,6 @@ void draw_crash_screen(OSThread *thread) {
         cause = 17;
     }
 
-    osWritebackDCacheAll();
-
     // disable reading AA coverage to prevent text being illegible
 
 #if defined(VERSION_US) || defined(VERSION_SH) || defined(VERSION_CN)
@@ -226,14 +224,13 @@ void draw_crash_screen(OSThread *thread) {
     osViSetSpecialFeatures(OS_VI_DITHER_FILTER_OFF);
     osViSetSpecialFeatures(OS_VI_GAMMA_OFF); // automatically re-enabled from vi mode change
 
-
     crash_screen_draw_rect(25, 20, 270, 25);
+    osWritebackDCacheAll();
     crash_screen_print(30, 25, "THREAD:%d  (%s)", thread->id, gCauseDesc[cause]);
     crash_screen_print(30, 35, "PC:%08XH   SR:%08XH   VA:%08XH", tc->pc, tc->sr, tc->badvaddr);
     n64_printf("=================== CRASH ===================\n");
     n64_printf("THREAD: %d  (%s)\n", thread->id, gCauseDesc[cause]);
     n64_printf("PC: %08XH   SR: %08XH   VA: %08XH\n\n", tc->pc, tc->sr, tc->badvaddr);
-    crash_screen_sleep(2000);
     crash_screen_draw_rect(25, 45, 270, 185);
     crash_screen_print(30, 50, "AT:%08XH   V0:%08XH   V1:%08XH", (u32) tc->at, (u32) tc->v0,
                        (u32) tc->v1);
@@ -294,7 +291,8 @@ void draw_crash_screen(OSThread *thread) {
     n64_printf("\n");
     n64_printf("==============================================\n");
     osViBlack(FALSE);
-    osViSwapBuffer(gCrashScreen.framebuffer);
+    crash_screen_sleep(2500);
+    play_music(SEQ_PLAYER_LEVEL, SEQ_LEVEL_BOSS_KOOPA, 0);
 }
 
 OSThread *get_crashed_thread(void) {
@@ -322,21 +320,18 @@ void thread2_crash_screen(UNUSED void *arg) {
         thread = get_crashed_thread();
     } while (thread == NULL);
 
+    if (thread->id == 5 || thread->id == 6) { // only care about this if game or rumble crashes
+        gCrashScreen.thread.priority = 15;
+        sound_reset(0);
+        play_music(SEQ_PLAYER_LEVEL, SEQ_EVENT_KOOPA_MESSAGE, 0);
+        crash_screen_sleep(2000);
+        play_sound(SOUND_MENU_BOWSER_LAUGH, gGlobalSoundSource);
+        audio_signal_game_loop_tick();
+    }
+
     crash_screen_draw_bg();
     osWritebackDCacheAll();
     draw_crash_screen(thread);
-
-    if (thread->id == 5) {
-        gCrashScreen.thread.priority = 15;
-        stop_sounds_in_continuous_banks();
-        stop_background_music(get_current_background_music());
-        audio_signal_game_loop_tick();
-        crash_screen_sleep(200);
-        play_sound(SOUND_MENU_CAMERA_BUZZ, gGlobalSoundSource);
-        audio_signal_game_loop_tick();
-        play_music(SEQ_PLAYER_LEVEL, SEQ_LEVEL_WATER, 0);
-        crash_screen_sleep(200);
-    }
 
     for (;;) {
     }
