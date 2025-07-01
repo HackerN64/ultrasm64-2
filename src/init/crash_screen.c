@@ -73,20 +73,8 @@ void crash_screen_draw_bg() {
     ptr = gCrashScreen.framebuffer + gCrashScreen.width;
     for (i = 0; i < SCREEN_HEIGHT; i++) {
         for (j = 0; j < SCREEN_WIDTH; j++) {
-            u16 pixel = *ptr;
-
-            // Extract RGB (5 bits each)
-            u8 r = (pixel >> 11) & 0x1F;
-            u8 g = (pixel >> 6)  & 0x1F;
-            u8 b = (pixel >> 1)  & 0x1F;
-            u8 a = pixel & 0x01;
-
-            // Tint: add a bit of blue while reducing red/green slightly
-            r = (r * 3) / 4;
-            g = (g * 3) / 4;
-            b = b + ((255 - b) / 4);  // Move toward max blue
-
-            *ptr++ = GPACK_RGBA5551(r, g, b, a);
+            *ptr = (*ptr >> 1 & 0x7bde) | 0x21;
+            ptr++;
         }
         ptr += gCrashScreen.width - SCREEN_WIDTH;
     }
@@ -99,7 +87,7 @@ void crash_screen_draw_rect(s32 x, s32 y, s32 w, s32 h) {
     ptr = gCrashScreen.framebuffer + gCrashScreen.width * y + x;
     for (i = 0; i < h; i++) {
         for (j = 0; j < w; j++) {
-            *ptr = GPACK_RGBA5551(0, 0, 0, 1);
+            *ptr = 0x0001;
             ptr++;
         }
         ptr += gCrashScreen.width - w;
@@ -235,6 +223,7 @@ void draw_crash_screen(OSThread *thread) {
     osViSetMode(&osViModeTable[OS_VI_PAL_LPN1]);
 #endif
 
+    osViSetSpecialFeatures(OS_VI_DITHER_FILTER_OFF);
     osViSetSpecialFeatures(OS_VI_GAMMA_OFF); // automatically re-enabled from vi mode change
 
 
