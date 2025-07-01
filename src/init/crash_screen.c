@@ -195,7 +195,7 @@ void crash_screen_print_fpcsr(u32 fpcsr) {
 
     bit = 1 << 17;
     crash_screen_print(30, 155, "FPCSR:%08XH", fpcsr);
-    n64_printf("FPCSR:%08XH", fpcsr);
+    n64_printf("FPCSR: %08XH", fpcsr);
     for (i = 0; i < 6; i++) {
         if (fpcsr & bit) {
             crash_screen_print(132, 155, "(%s)", gFpcsrDesc[i]);
