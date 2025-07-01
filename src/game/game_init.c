@@ -360,6 +360,9 @@ void select_gfx_pool(void) {
  * - Yields to the VI framerate twice, locking the game at 30 FPS.
  * - Selects which framebuffer will be rendered and displayed to next time.
  */
+
+void crash_screen_set_framebuffer(u16 *framebuffer, u16 width, u16 height);
+
 void display_and_vsync(void) {
     profiler_log_thread5_time(BEFORE_DISPLAY_LISTS);
     osRecvMesg(&gGfxVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
@@ -371,6 +374,7 @@ void display_and_vsync(void) {
     profiler_log_thread5_time(AFTER_DISPLAY_LISTS);
     osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
     osViSwapBuffer((void *) PHYSICAL_TO_VIRTUAL(gPhysicalFramebuffers[sRenderedFramebuffer]));
+    crash_screen_set_framebuffer((u16 *) gFramebuffers[sRenderedFramebuffer], SCREEN_WIDTH, SCREEN_HEIGHT);
     profiler_log_thread5_time(THREAD5_END);
     osRecvMesg(&gGameVblankQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
     if (++sRenderedFramebuffer == 3) {
@@ -637,8 +641,6 @@ void setup_game_memory(void) {
     load_segment_decompress(2, _segment2_mio0SegmentRomStart, _segment2_mio0SegmentRomEnd);
 }
 
-extern u32 bootTime;
-
 /**
  * Main game loop thread. Runs forever as long as the game continues.
  */
@@ -687,16 +689,12 @@ void thread5_game_loop(UNUSED void *arg) {
 #endif
             osContStartReadData(&gSIEventMesgQueue);
         }
-
         audio_game_loop_tick();
         select_gfx_pool();
         read_controller_inputs();
         addr = level_script_execute(addr);
 
         display_and_vsync();
-        char buff[64];
-        //sprintf(buff, "BOOT TIME: %u", bootTime);
-        //print_text(64, 64, buff);
         // when debug info is enabled, print the "BUF %d" information.
         if (gShowDebugText) {
             // subtract the end of the gfx pool with the display list to obtain the

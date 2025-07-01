@@ -41,8 +41,6 @@ OSMesg gSIEventMesgBuf[1];
 OSMesg gIntrMesgBuf[16];
 OSMesg gUnknownMesgBuf[16];
 
-//u32 bootTime = 0;
-
 struct VblankHandler *gVblankHandler1 = NULL;
 struct VblankHandler *gVblankHandler2 = NULL;
 struct SPTask *gActiveSPTask = NULL;
@@ -339,7 +337,6 @@ void thread3_main(UNUSED void *arg) {
 #ifndef LIBDRAGON_IPL3
     load_engine_code_segment();
 #endif
-    //bootTime = osGetCount();
 
     crash_screen_init();
 

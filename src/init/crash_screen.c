@@ -8,6 +8,12 @@
 #include "lib/hackerlibultra/src/libc/xstdio.h"
 #include "n64-stdio.h"
 
+#include "audio/external.h"
+#include "sounds.h"
+#include "seq_ids.h"
+
+extern u32 gGlobalTimer;
+
 u8 gCrashScreenCharToGlyph[128] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 41, -1, -1, -1, 43, -1, -1, 37, 38, -1, 42,
@@ -60,6 +66,32 @@ struct {
     u16 height;
 } gCrashScreen;
 
+void crash_screen_draw_bg() {
+    u16 *ptr;
+    s32 i, j;
+
+    ptr = gCrashScreen.framebuffer + gCrashScreen.width;
+    for (i = 0; i < SCREEN_HEIGHT; i++) {
+        for (j = 0; j < SCREEN_WIDTH; j++) {
+            u16 pixel = *ptr;
+
+            // Extract RGB (5 bits each)
+            u8 r = (pixel >> 11) & 0x1F;
+            u8 g = (pixel >> 6)  & 0x1F;
+            u8 b = (pixel >> 1)  & 0x1F;
+            u8 a = pixel & 0x01;
+
+            // Tint: add a bit of blue while reducing red/green slightly
+            r = (r * 3) / 4;
+            g = (g * 3) / 4;
+            b = b + ((255 - b) / 4);  // Move toward max blue
+
+            *ptr++ = GPACK_RGBA5551(r, g, b, a);
+        }
+        ptr += gCrashScreen.width - SCREEN_WIDTH;
+    }
+}
+
 void crash_screen_draw_rect(s32 x, s32 y, s32 w, s32 h) {
     u16 *ptr;
     s32 i, j;
@@ -67,8 +99,7 @@ void crash_screen_draw_rect(s32 x, s32 y, s32 w, s32 h) {
     ptr = gCrashScreen.framebuffer + gCrashScreen.width * y + x;
     for (i = 0; i < h; i++) {
         for (j = 0; j < w; j++) {
-            // 0xe738 = 0b1110011100111000
-            *ptr = ((*ptr & 0xe738) >> 2) | 1;
+            *ptr = GPACK_RGBA5551(0, 0, 0, 1);
             ptr++;
         }
         ptr += gCrashScreen.width - w;
@@ -189,11 +220,28 @@ void draw_crash_screen(OSThread *thread) {
     }
 
     osWritebackDCacheAll();
-    n64_printf("Size of crash font: %u", sizeof(gCrashScreenFont));
+
+    // disable reading AA coverage to prevent text being illegible
+
+#if defined(VERSION_US) || defined(VERSION_SH) || defined(VERSION_CN)
+    if (osTvType == OS_TV_NTSC) {
+        osViSetMode(&osViModeTable[OS_VI_NTSC_LPN1]);
+    } else {
+        osViSetMode(&osViModeTable[OS_VI_PAL_LPN1]);
+    }
+#elif defined(VERSION_JP)
+    osViSetMode(&osViModeTable[OS_VI_NTSC_LPN1]);
+#else // VERSION_EU
+    osViSetMode(&osViModeTable[OS_VI_PAL_LPN1]);
+#endif
+
+    osViSetSpecialFeatures(OS_VI_GAMMA_OFF); // automatically re-enabled from vi mode change
+
+
     crash_screen_draw_rect(25, 20, 270, 25);
     crash_screen_print(30, 25, "THREAD:%d  (%s)", thread->id, gCauseDesc[cause]);
     crash_screen_print(30, 35, "PC:%08XH   SR:%08XH   VA:%08XH", tc->pc, tc->sr, tc->badvaddr);
-    n64_printf("===================== CRASH ======================\n");
+    n64_printf("=================== CRASH ===================\n");
     n64_printf("THREAD: %d  (%s)\n", thread->id, gCauseDesc[cause]);
     n64_printf("PC: %08XH   SR: %08XH   VA: %08XH\n\n", tc->pc, tc->sr, tc->badvaddr);
     crash_screen_sleep(2000);
@@ -217,6 +265,9 @@ void draw_crash_screen(OSThread *thread) {
     crash_screen_print(30, 130, "T9:%08XH   GP:%08XH   SP:%08XH", (u32) tc->t9, (u32) tc->gp,
                        (u32) tc->sp);
     crash_screen_print(30, 140, "S8:%08XH   RA:%08XH", (u32) tc->s8, (u32) tc->ra);
+
+    // unfortunately, i could not get the crash screen print func
+    // to pass on the arguments to n64_printf without crashing the crash screen...
 
     n64_printf("AT: %08XH   V0: %08XH   V1: %08XH\n", (u32) tc->at, (u32) tc->v0, (u32) tc->v1);
     n64_printf("A0: %08XH   A1: %08XH   A2: %08XH\n", (u32) tc->a0, (u32) tc->a1, (u32) tc->a2);
@@ -252,7 +303,7 @@ void draw_crash_screen(OSThread *thread) {
     n64_printf("\n");
     crash_screen_print_float_reg(30, 220, 30, &tc->fp30.f.f_even);
     n64_printf("\n");
-    n64_printf("==================================================\n");
+    n64_printf("==============================================\n");
     osViBlack(FALSE);
     osViSwapBuffer(gCrashScreen.framebuffer);
 }
@@ -281,7 +332,23 @@ void thread2_crash_screen(UNUSED void *arg) {
         osRecvMesg(&gCrashScreen.mesgQueue, &mesg, 1);
         thread = get_crashed_thread();
     } while (thread == NULL);
+
+    crash_screen_draw_bg();
+    osWritebackDCacheAll();
     draw_crash_screen(thread);
+
+    if (thread->id == 5) {
+        gCrashScreen.thread.priority = 15;
+        stop_sounds_in_continuous_banks();
+        stop_background_music(get_current_background_music());
+        audio_signal_game_loop_tick();
+        crash_screen_sleep(200);
+        play_sound(SOUND_MENU_CAMERA_BUZZ, gGlobalSoundSource);
+        audio_signal_game_loop_tick();
+        play_music(SEQ_PLAYER_LEVEL, SEQ_LEVEL_WATER, 0);
+        crash_screen_sleep(200);
+    }
+
     for (;;) {
     }
 }
@@ -293,7 +360,6 @@ void crash_screen_set_framebuffer(u16 *framebuffer, u16 width, u16 height) {
 }
 
 void crash_screen_init(void) {
-    gCrashScreen.framebuffer = (u16 *) (osMemSize | 0xA0000000) - SCREEN_WIDTH * SCREEN_HEIGHT;
     gCrashScreen.width = SCREEN_WIDTH;
     gCrashScreen.height = 0x10;
     osCreateMesgQueue(&gCrashScreen.mesgQueue, &gCrashScreen.mesg, 1);
