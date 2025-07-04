@@ -6,13 +6,15 @@
 
 #include "PR/os_internal.h"
 #include "lib/hackerlibultra/src/libc/xstdio.h"
-#include "n64-stdio.h"
+#include "n64-libc.h"
 
 #include "audio/external.h"
 #include "sounds.h"
 #include "seq_ids.h"
 
 extern u32 gGlobalTimer;
+
+char *assertMsg = NULL;
 
 u8 gCrashScreenCharToGlyph[128] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -149,6 +151,11 @@ void crash_screen_print(s32 x, s32 y, const char *fmt, ...) {
 
             ptr++;
             x += 6;
+
+            if (x >= 285) {
+                x = 30;
+                y += 10;
+            }
         }
     }
 
@@ -292,6 +299,10 @@ void draw_crash_screen(OSThread *thread) {
     n64_printf("==============================================\n");
     osViBlack(FALSE);
     crash_screen_sleep(2500);
+    if (assertMsg != NULL) {
+        crash_screen_draw_rect(25, 45, 270, 185);
+        crash_screen_print(30, 50, assertMsg);
+    }
     play_music(SEQ_PLAYER_LEVEL, SEQ_LEVEL_BOSS_KOOPA, 0);
 }
 

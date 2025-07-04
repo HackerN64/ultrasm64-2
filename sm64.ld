@@ -9,6 +9,8 @@ OUTPUT_ARCH (mips)
 #include "config.h"
 #include "ld.h"
 
+EXTERN(assertMsg);
+
 SECTIONS
 {
     __romPos = 0;
@@ -52,7 +54,7 @@ SECTIONS
         AUDIO_DIR*.o(.text);
         ULTRA_BUILD_DIR/libgultra_rom.a:*.o(.text);
         BUILD_DIR/src/audio/external.o(.text);
-        BUILD_DIR/n64-libc.a:*.o(.text);
+        BUILD_DIR/n64-libc.a:*.o(.text*);
         BUILD_DIR/libpl2.a:*.o(.text);
         BUILD_DIR/lib/rsp.o(.text);
 
