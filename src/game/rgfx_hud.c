@@ -2,6 +2,11 @@
 #include "init/memory.h"
 #include "rgfx_hud.h"
 #include "n64-string.h"
+#include "n64-stdio.h"
+#include "sm64.h"
+
+#define ULTRASM64_2
+
 #ifdef ULTRASM64_2
 #define RGFX_PRINTF n64_printf
 #else
@@ -17,7 +22,7 @@ static RgfxHud *sRgfxHudHead[RGFX_HUD_LAYERS] = { &sRgfxHudBuffer[0][0], &sRgfxH
 
 static void debug_crash(char *s) {
     RGFX_PRINTF(s);
-    while (TRUE) {}
+    CRASH;
 }
 
 static RgfxHud *alloc_hud(u8 layer) {
@@ -70,7 +75,7 @@ RgfxHud *rgfx_hud_create_box(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z,
     return c;
 }
 
-RgfxHud *rgfx_hud_create_txt(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z, u8 font, char *s) {
+RgfxHud *rgfx_hud_create_txt(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z, RgfxFont font, char *s) {
     RgfxHud *c = alloc_hud(layer);
     c->type = RGFX_TEXT;
     c->parent = parent;
@@ -118,12 +123,60 @@ RgfxHud *rgfx_hud_create_gfx(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z,
     return c;
 }
 
-s16 get_true_x(RgfxHud *c) {
-    return 0;
+static inline s16 get_true_x(RgfxHud *c, s16 x) {
+    s16 ret = 0;
+    if (c->parent != NULL) {
+        ret = get_true_x(c->parent, x + c->x);
+    } else {
+        ret = c->x + x;
+    }
+    return ret;
 }
 
-s16 get_true_y(RgfxHud *c) {
-    return 0;
+static inline s16 get_true_y(RgfxHud *c, s16 y) {
+    s16 ret = 0;
+    if (c->parent != NULL) {
+        ret = get_true_y(c->parent, y + c->y);
+    } else {
+        ret = c->y + y;
+    }
+    return ret;
+}
+
+static inline s16 get_true_z(RgfxHud *c, s16 z) {
+    s16 ret = 0;
+    if (c->parent != NULL) {
+        ret = get_true_z(c->parent, z + c->z);
+    } else {
+        ret = c->z + z;
+    }
+    return ret;
+}
+
+static void rgfx_draw_box(RgfxHud *c) {
+    if (is_2d_element(c)) { // we are using fillrect
+    } else { // we are using ortho triangles
+    }
+}
+
+static void rgfx_draw_text(RgfxHud *c) {
+    if (is_2d_element(c)) { // we are using texture rectangles
+    } else { // we are using ortho triangles
+    }
+}
+
+static void rgfx_draw_sprite(RgfxHud *c) {
+    if (is_2d_element(c)) { // we are using texture rectangles
+    } else { // we are using ortho triangles
+    }
+}
+
+static void rgfx_draw_scissor(RgfxHud *c) {
+
+}
+
+static void rgfx_draw_gfx(RgfxHud *c) {
+
 }
 
 void rgfx_hud_draw() {
@@ -132,24 +185,12 @@ void rgfx_hud_draw() {
         RgfxHud *c = &sRgfxHudBuffer[i][0];
         while (c->type != RGFX_END) {
             switch (c->type) {
-                case RGFX_BOX:
-                    if (is_2d_element(c)) {
-                    } else {
-                    }
-                break;
-                case RGFX_TEXT:
-                    if (is_2d_element(c)) {
-                    } else {
-                    }
-                break;
-                case RGFX_SPRITE: break;
-                    if (is_2d_element(c)) {
-                    } else {
-                    }
-                break;
-                case RGFX_SCISSOR: break;
-                case RGFX_GFX: break;
-                case RGFX_END: break; // avoids gcc warning
+                case RGFX_BOX:      rgfx_draw_box(c);     break;
+                case RGFX_TEXT:     rgfx_draw_text(c);    break;
+                case RGFX_SPRITE:   rgfx_draw_sprite(c);  break;
+                case RGFX_SCISSOR:  rgfx_draw_scissor(c); break;
+                case RGFX_GFX:      rgfx_draw_gfx(c);     break;
+                case RGFX_END:                            break; // avoids gcc warning
             }
             c++;
         }
