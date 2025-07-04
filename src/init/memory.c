@@ -93,7 +93,7 @@ void move_segment_table_to_dmem(void) {
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        gSPSegment(gDisplayListHead++, i, sSegmentTable[i]);
+        gSPSegment(MASTERDL, i, sSegmentTable[i]);
     }
 }
 #else

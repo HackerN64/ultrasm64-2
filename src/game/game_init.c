@@ -85,47 +85,47 @@ struct DemoInput gRecordedDemoInput = { 0 };
  * Sets the initial RDP (Reality Display Processor) rendering settings.
  */
 void init_rdp(void) {
-    gDPPipeSync(gDisplayListHead++);
-    gDPPipelineMode(gDisplayListHead++, G_PM_1PRIMITIVE);
+    gDPPipeSync(MASTERDL);
+    gDPPipelineMode(MASTERDL, G_PM_1PRIMITIVE);
 
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    gDPSetCombineMode(gDisplayListHead++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetScissor(MASTERDL, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPSetCombineMode(MASTERDL, G_CC_SHADE, G_CC_SHADE);
 
-    gDPSetTextureLOD(gDisplayListHead++, G_TL_TILE);
-    gDPSetTextureLUT(gDisplayListHead++, G_TT_NONE);
-    gDPSetTextureDetail(gDisplayListHead++, G_TD_CLAMP);
-    gDPSetTexturePersp(gDisplayListHead++, G_TP_PERSP);
-    gDPSetTextureFilter(gDisplayListHead++, G_TF_BILERP);
-    gDPSetTextureConvert(gDisplayListHead++, G_TC_FILT);
+    gDPSetTextureLOD(MASTERDL, G_TL_TILE);
+    gDPSetTextureLUT(MASTERDL, G_TT_NONE);
+    gDPSetTextureDetail(MASTERDL, G_TD_CLAMP);
+    gDPSetTexturePersp(MASTERDL, G_TP_PERSP);
+    gDPSetTextureFilter(MASTERDL, G_TF_BILERP);
+    gDPSetTextureConvert(MASTERDL, G_TC_FILT);
 
-    gDPSetCombineKey(gDisplayListHead++, G_CK_NONE);
-    gDPSetAlphaCompare(gDisplayListHead++, G_AC_NONE);
-    gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetColorDither(gDisplayListHead++, G_CD_MAGICSQ);
-    gDPSetCycleType(gDisplayListHead++, G_CYC_FILL);
+    gDPSetCombineKey(MASTERDL, G_CK_NONE);
+    gDPSetAlphaCompare(MASTERDL, G_AC_NONE);
+    gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetColorDither(MASTERDL, G_CD_MAGICSQ);
+    gDPSetCycleType(MASTERDL, G_CYC_FILL);
 
 #if defined(VERSION_SH) || defined(VERSION_CN)
-    gDPSetAlphaDither(gDisplayListHead++, G_AD_PATTERN);
+    gDPSetAlphaDither(MASTERDL, G_AD_PATTERN);
 #endif
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 }
 
 /**
  * Sets the initial RSP (Reality Signal Processor) settings.
  */
 void init_rsp(void) {
-    gSPClearGeometryMode(gDisplayListHead++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BOTH | G_FOG
+    gSPClearGeometryMode(MASTERDL, G_SHADE | G_SHADING_SMOOTH | G_CULL_BOTH | G_FOG
                         | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD);
 
-    gSPSetGeometryMode(gDisplayListHead++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK | G_LIGHTING);
+    gSPSetGeometryMode(MASTERDL, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK | G_LIGHTING);
 
-    gSPNumLights(gDisplayListHead++, NUMLIGHTS_1);
-    gSPTexture(gDisplayListHead++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+    gSPNumLights(MASTERDL, NUMLIGHTS_1);
+    gSPTexture(MASTERDL, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
 
     // @bug Failing to set the clip ratio will result in warped triangles in F3DEX2
     // without this change: https://jrra.zone/n64/doc/n64man/gsp/gSPClipRatio.htm
 #ifdef F3DEX_GBI_2
-    gSPClipRatio(gDisplayListHead++, FRUSTRATIO_1);
+    gSPClipRatio(MASTERDL, FRUSTRATIO_1);
 #endif
 }
 
@@ -133,16 +133,16 @@ void init_rsp(void) {
  * Initialize the z buffer for the current frame.
  */
 void init_z_buffer(void) {
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetDepthSource(gDisplayListHead++, G_ZS_PIXEL);
-    gDPSetDepthImage(gDisplayListHead++, gPhysicalZBuffer);
+    gDPSetDepthSource(MASTERDL, G_ZS_PIXEL);
+    gDPSetDepthImage(MASTERDL, gPhysicalZBuffer);
 
-    gDPSetColorImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, gPhysicalZBuffer);
-    gDPSetFillColor(gDisplayListHead++,
+    gDPSetColorImage(MASTERDL, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, gPhysicalZBuffer);
+    gDPSetFillColor(MASTERDL,
                     GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
 
-    gDPFillRectangle(gDisplayListHead++, 0, BORDER_HEIGHT, SCREEN_WIDTH - 1,
+    gDPFillRectangle(MASTERDL, 0, BORDER_HEIGHT, SCREEN_WIDTH - 1,
                      SCREEN_HEIGHT - 1 - BORDER_HEIGHT);
 }
 
@@ -150,12 +150,12 @@ void init_z_buffer(void) {
  * Tells the RDP which of the three framebuffers it shall draw to.
  */
 void select_framebuffer(void) {
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetCycleType(gDisplayListHead++, G_CYC_1CYCLE);
-    gDPSetColorImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+    gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
+    gDPSetColorImage(MASTERDL, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                      gPhysicalFramebuffers[sRenderingFramebuffer]);
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, BORDER_HEIGHT, SCREEN_WIDTH,
+    gDPSetScissor(MASTERDL, G_SC_NON_INTERLACE, 0, BORDER_HEIGHT, SCREEN_WIDTH,
                   SCREEN_HEIGHT - BORDER_HEIGHT);
 }
 
@@ -164,19 +164,19 @@ void select_framebuffer(void) {
  * Information about the color argument: https://jrra.zone/n64/doc/n64man/gdp/gDPSetFillColor.htm
  */
 void clear_framebuffer(s32 color) {
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCycleType(gDisplayListHead++, G_CYC_FILL);
+    gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCycleType(MASTERDL, G_CYC_FILL);
 
-    gDPSetFillColor(gDisplayListHead++, color);
-    gDPFillRectangle(gDisplayListHead++,
+    gDPSetFillColor(MASTERDL, color);
+    gDPFillRectangle(MASTERDL,
                      GFX_DIMENSIONS_RECT_FROM_LEFT_EDGE(0), BORDER_HEIGHT,
                      GFX_DIMENSIONS_RECT_FROM_RIGHT_EDGE(0) - 1, SCREEN_HEIGHT - BORDER_HEIGHT - 1);
 
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetCycleType(gDisplayListHead++, G_CYC_1CYCLE);
+    gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
 }
 
 /**
@@ -193,35 +193,35 @@ void clear_viewport(Vp *viewport, s32 color) {
     vpLrx = GFX_DIMENSIONS_RECT_FROM_RIGHT_EDGE(SCREEN_WIDTH - vpLrx);
 #endif
 
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCycleType(gDisplayListHead++, G_CYC_FILL);
+    gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCycleType(MASTERDL, G_CYC_FILL);
 
-    gDPSetFillColor(gDisplayListHead++, color);
-    gDPFillRectangle(gDisplayListHead++, vpUlx, vpUly, vpLrx, vpLry);
+    gDPSetFillColor(MASTERDL, color);
+    gDPFillRectangle(MASTERDL, vpUlx, vpUly, vpLrx, vpLry);
 
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetCycleType(gDisplayListHead++, G_CYC_1CYCLE);
+    gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
 }
 
 /**
  * Draw the horizontal screen borders.
  */
 void draw_screen_borders(void) {
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    gDPSetRenderMode(gDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCycleType(gDisplayListHead++, G_CYC_FILL);
+    gDPSetScissor(MASTERDL, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCycleType(MASTERDL, G_CYC_FILL);
 
-    gDPSetFillColor(gDisplayListHead++, GPACK_RGBA5551(0, 0, 0, 0) << 16 | GPACK_RGBA5551(0, 0, 0, 0));
+    gDPSetFillColor(MASTERDL, GPACK_RGBA5551(0, 0, 0, 0) << 16 | GPACK_RGBA5551(0, 0, 0, 0));
 
 #if BORDER_HEIGHT != 0
-    gDPFillRectangle(gDisplayListHead++, GFX_DIMENSIONS_RECT_FROM_LEFT_EDGE(0), 0,
+    gDPFillRectangle(MASTERDL, GFX_DIMENSIONS_RECT_FROM_LEFT_EDGE(0), 0,
                      GFX_DIMENSIONS_RECT_FROM_RIGHT_EDGE(0) - 1, BORDER_HEIGHT - 1);
-    gDPFillRectangle(gDisplayListHead++,
+    gDPFillRectangle(MASTERDL,
                      GFX_DIMENSIONS_RECT_FROM_LEFT_EDGE(0), SCREEN_HEIGHT - BORDER_HEIGHT,
                      GFX_DIMENSIONS_RECT_FROM_RIGHT_EDGE(0) - 1, SCREEN_HEIGHT - 1);
 #endif
@@ -237,7 +237,7 @@ void make_viewport_clip_rect(Vp *viewport) {
     s16 vpLrx = (viewport->vp.vtrans[0] + viewport->vp.vscale[0]) / 4 - 1;
     s16 vpLry = (viewport->vp.vtrans[1] + viewport->vp.vscale[1]) / 4 - 1;
 
-    gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, vpUlx, vpPly, vpLrx, vpLry);
+    gDPSetScissor(MASTERDL, G_SC_NON_INTERLACE, vpUlx, vpPly, vpLrx, vpLry);
 }
 
 /**
@@ -288,8 +288,8 @@ void end_master_display_list(void) {
         draw_profiler();
     }
 
-    gDPFullSync(gDisplayListHead++);
-    gSPEndDisplayList(gDisplayListHead++);
+    gDPFullSync(MASTERDL);
+    gSPEndDisplayList(MASTERDL);
 
     create_gfx_task_structure();
 }

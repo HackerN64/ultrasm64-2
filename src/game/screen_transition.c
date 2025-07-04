@@ -63,12 +63,12 @@ s32 dl_transition_color(s8 fadeTimer, u8 transTime, struct WarpTransitionData *t
     Vtx *verts = vertex_transition_color(transData, alpha);
 
     if (verts != NULL) {
-        gSPDisplayList(gDisplayListHead++, dl_proj_mtx_fullscreen);
-        gDPSetCombineMode(gDisplayListHead++, G_CC_SHADE, G_CC_SHADE);
-        gDPSetRenderMode(gDisplayListHead++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-        gSPVertex(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(verts), 4, 0);
-        gSPDisplayList(gDisplayListHead++, dl_draw_quad_verts_0123);
-        gSPDisplayList(gDisplayListHead++, dl_screen_transition_end);
+        gSPDisplayList(MASTERDL, dl_proj_mtx_fullscreen);
+        gDPSetCombineMode(MASTERDL, G_CC_SHADE, G_CC_SHADE);
+        gDPSetRenderMode(MASTERDL, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gSPVertex(MASTERDL, VIRTUAL_TO_PHYSICAL(verts), 4, 0);
+        gSPDisplayList(MASTERDL, dl_draw_quad_verts_0123);
+        gSPDisplayList(MASTERDL, dl_screen_transition_end);
     }
     return set_and_reset_transition_fade_timer(fadeTimer, transTime);
 }
@@ -176,30 +176,30 @@ s32 render_textured_transition(s8 fadeTimer, s8 transTime, struct WarpTransition
 
     if (verts != NULL) {
         load_tex_transition_vertex(verts, fadeTimer, transData, centerTransX, centerTransY, texTransRadius, transTexType);
-        gSPDisplayList(gDisplayListHead++, dl_proj_mtx_fullscreen)
-        gDPSetCombineMode(gDisplayListHead++, G_CC_SHADE, G_CC_SHADE);
-        gDPSetRenderMode(gDisplayListHead++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
-        gSPVertex(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(verts), 8, 0);
-        gSPDisplayList(gDisplayListHead++, dl_transition_draw_filled_region);
-        gDPPipeSync(gDisplayListHead++);
-        gDPSetCombineMode(gDisplayListHead++, G_CC_MODULATEIDECALA, G_CC_MODULATEIDECALA);
-        gDPSetRenderMode(gDisplayListHead++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-        gDPSetTextureFilter(gDisplayListHead++, G_TF_BILERP);
+        gSPDisplayList(MASTERDL, dl_proj_mtx_fullscreen)
+        gDPSetCombineMode(MASTERDL, G_CC_SHADE, G_CC_SHADE);
+        gDPSetRenderMode(MASTERDL, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+        gSPVertex(MASTERDL, VIRTUAL_TO_PHYSICAL(verts), 8, 0);
+        gSPDisplayList(MASTERDL, dl_transition_draw_filled_region);
+        gDPPipeSync(MASTERDL);
+        gDPSetCombineMode(MASTERDL, G_CC_MODULATEIDECALA, G_CC_MODULATEIDECALA);
+        gDPSetRenderMode(MASTERDL, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetTextureFilter(MASTERDL, G_TF_BILERP);
         switch (transTexType) {
         case TRANS_TYPE_MIRROR:
-            gDPLoadTextureBlock(gDisplayListHead++, sTextureTransitionID[texID], G_IM_FMT_IA, G_IM_SIZ_8b, 32, 64, 0,
+            gDPLoadTextureBlock(MASTERDL, sTextureTransitionID[texID], G_IM_FMT_IA, G_IM_SIZ_8b, 32, 64, 0,
                 G_TX_WRAP | G_TX_MIRROR, G_TX_WRAP | G_TX_MIRROR, 5, 6, G_TX_NOLOD, G_TX_NOLOD);
             break;
         case TRANS_TYPE_CLAMP:
-            gDPLoadTextureBlock(gDisplayListHead++, sTextureTransitionID[texID], G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0,
+            gDPLoadTextureBlock(MASTERDL, sTextureTransitionID[texID], G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0,
                 G_TX_CLAMP, G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
             break;
         }
-        gSPTexture(gDisplayListHead++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-        gSPVertex(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(verts), 4, 0);
-        gSPDisplayList(gDisplayListHead++, dl_draw_quad_verts_0123);
-        gSPTexture(gDisplayListHead++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
-        gSPDisplayList(gDisplayListHead++, dl_screen_transition_end);
+        gSPTexture(MASTERDL, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+        gSPVertex(MASTERDL, VIRTUAL_TO_PHYSICAL(verts), 4, 0);
+        gSPDisplayList(MASTERDL, dl_draw_quad_verts_0123);
+        gSPTexture(MASTERDL, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
+        gSPDisplayList(MASTERDL, dl_screen_transition_end);
         sTransitionTextureFadeCount[fadeTimer] += transData->texTimer;
     } else {
     }

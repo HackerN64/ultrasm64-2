@@ -366,13 +366,13 @@ s8 char_to_glyph_index(char c) {
 void add_glyph_texture(s8 glyphIndex) {
     const u8 *const *glyphs = segmented_to_virtual(main_hud_lut);
 
-    gDPPipeSync(gDisplayListHead++);
+    gDPPipeSync(MASTERDL);
 #ifdef VERSION_CN
-    gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[(u8) glyphIndex]);
+    gDPSetTextureImage(MASTERDL, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[(u8) glyphIndex]);
 #else
-    gDPSetTextureImage(gDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[glyphIndex]);
+    gDPSetTextureImage(MASTERDL, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, glyphs[glyphIndex]);
 #endif
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_load_tex_block);
+    gSPDisplayList(MASTERDL, dl_hud_img_load_tex_block);
 }
 
 #ifndef WIDESCREEN
@@ -418,7 +418,7 @@ void render_textrect(s32 x, s32 y, s32 pos) {
 #endif
     rectX = rectBaseX;
     rectY = rectBaseY;
-    gSPTextureRectangle(gDisplayListHead++, rectX << 2, rectY << 2, (rectX + 15) << 2,
+    gSPTextureRectangle(MASTERDL, rectX << 2, rectY << 2, (rectX + 15) << 2,
                         (rectY + 15) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10);
 }
 
@@ -444,9 +444,9 @@ void render_text_labels(void) {
     }
 
     guOrtho(mtx, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
-    gSPPerspNormalize((Gfx *) (gDisplayListHead++), 0xFFFF);
-    gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(mtx), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_begin);
+    gSPPerspNormalize((Gfx *) (MASTERDL), 0xFFFF);
+    gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(mtx), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList(MASTERDL, dl_hud_img_begin);
 
     for (i = 0; i < sTextLabelsCount; i++) {
         for (j = 0; j < sTextLabels[i]->length; j++) {
@@ -519,7 +519,7 @@ void render_text_labels(void) {
         mem_pool_free(gEffectsMemoryPool, sTextLabels[i]);
     }
 
-    gSPDisplayList(gDisplayListHead++, dl_hud_img_end);
+    gSPDisplayList(MASTERDL, dl_hud_img_end);
 
     sTextLabelsCount = 0;
 }

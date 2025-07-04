@@ -214,28 +214,28 @@ void print_course_number(void) {
     create_dl_translation_matrix(MENU_MTX_PUSH, 158.0f, 81.0f, 0.0f);
 
     // Full wood texture in JP & US, lower part of it on EU
-    gSPDisplayList(gDisplayListHead++, dl_menu_rgba16_wood_course);
+    gSPDisplayList(MASTERDL, dl_menu_rgba16_wood_course);
 
 #ifdef VERSION_EU
     // Change upper part of the wood texture depending of the language defined
     switch (language) {
         case LANGUAGE_ENGLISH:
-            gSPDisplayList(gDisplayListHead++, dl_menu_texture_course_upper);
+            gSPDisplayList(MASTERDL, dl_menu_texture_course_upper);
             break;
         case LANGUAGE_FRENCH:
-            gSPDisplayList(gDisplayListHead++, dl_menu_texture_niveau_upper);
+            gSPDisplayList(MASTERDL, dl_menu_texture_niveau_upper);
             break;
         case LANGUAGE_GERMAN:
-            gSPDisplayList(gDisplayListHead++, dl_menu_texture_kurs_upper);
+            gSPDisplayList(MASTERDL, dl_menu_texture_kurs_upper);
             break;
     }
 
-    gSPDisplayList(gDisplayListHead++, dl_menu_rgba16_wood_course_end);
+    gSPDisplayList(MASTERDL, dl_menu_rgba16_wood_course_end);
 #endif
 
-    gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 255);
+    gSPPopMatrix(MASTERDL, G_MTX_MODELVIEW);
+    gSPDisplayList(MASTERDL, dl_rgba16_text_begin);
+    gDPSetEnvColor(MASTERDL, 255, 255, 255, 255);
 
     int_to_str(gCurrCourseNum, courseNum);
 
@@ -245,7 +245,7 @@ void print_course_number(void) {
         print_hud_lut_string(HUD_LUT_GLOBAL, 143, 158, courseNum);
     }
 
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_end);
+    gSPDisplayList(MASTERDL, dl_rgba16_text_end);
 }
 
 #ifdef VERSION_JP
@@ -304,13 +304,13 @@ void print_act_selector_strings(void) {
 #endif
 
     // Print the coin highscore.
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, 255, 255, 255, 255);
+    gSPDisplayList(MASTERDL, dl_rgba16_text_begin);
+    gDPSetEnvColor(MASTERDL, 255, 255, 255, 255);
     print_hud_my_score_coins(1, gCurrSaveFileNum - 1, COURSE_NUM_TO_INDEX(gCurrCourseNum), 155, 106);
-    gSPDisplayList(gDisplayListHead++, dl_rgba16_text_end);
+    gSPDisplayList(MASTERDL, dl_rgba16_text_end);
 
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, 255);
+    gSPDisplayList(MASTERDL, dl_ia_text_begin);
+    gDPSetEnvColor(MASTERDL, 0, 0, 0, 255);
     // Print the "MY SCORE" text if the coin score is more than 0
     if (save_file_get_course_coin_score(gCurrSaveFileNum - 1, COURSE_NUM_TO_INDEX(gCurrCourseNum)) != 0) {
         // TODO: Macros for all these hardcoded positions would be nice
@@ -331,7 +331,7 @@ void print_act_selector_strings(void) {
     print_generic_string(lvlNameX, 33, currLevelName + 3);
 #endif
 
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
+    gSPDisplayList(MASTERDL, dl_ia_text_end);
 
 #ifdef VERSION_EU
     print_course_number(language);
@@ -340,11 +340,11 @@ void print_act_selector_strings(void) {
 #endif
 
 #ifdef VERSION_CN
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_begin);
+    gSPDisplayList(MASTERDL, dl_ia_text_begin);
 #else
-    gSPDisplayList(gDisplayListHead++, dl_menu_ia8_text_begin);
+    gSPDisplayList(MASTERDL, dl_menu_ia8_text_begin);
 #endif
-    gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, 255);
+    gDPSetEnvColor(MASTERDL, 0, 0, 0, 255);
 
     // Print the name of the selected act.
     if (sVisibleStars != 0) {
@@ -360,10 +360,10 @@ void print_act_selector_strings(void) {
     }
 
 #ifdef VERSION_CN
-    gSPDisplayList(gDisplayListHead++, dl_ia_text_end);
+    gSPDisplayList(MASTERDL, dl_ia_text_end);
 
-    gSPDisplayList(gDisplayListHead++, dl_menu_ia8_text_begin);
-    gDPSetEnvColor(gDisplayListHead++, 0, 0, 0, 255);
+    gSPDisplayList(MASTERDL, dl_menu_ia8_text_begin);
+    gDPSetEnvColor(MASTERDL, 0, 0, 0, 255);
 #endif
 
     // Print the numbers above each star.
@@ -376,7 +376,7 @@ void print_act_selector_strings(void) {
 #endif
     }
 
-    gSPDisplayList(gDisplayListHead++, dl_menu_ia8_text_end);
+    gSPDisplayList(MASTERDL, dl_menu_ia8_text_end);
 }
 
 /**
