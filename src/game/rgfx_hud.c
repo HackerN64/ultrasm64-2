@@ -6,6 +6,8 @@
 #include "n64-stdio.h"
 #include "sm64.h"
 
+#include "segment2.h"
+
 /*
  * RGFXHUD 5
  * Features 3D transforms for menu elements.
@@ -203,6 +205,7 @@ static void rgfx_draw_box(RgfxHud *c) {
         y2 = SCREEN_HEIGHT;
     }
     gDPPipeSync(MASTERDL);
+    gDPSetCombineLERP(MASTERDL, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT);
     if (is_2d_element(c) && !is_parent_3d(c)) { // we are using fillrect
         if (c->d.box.color[3] == 255 && ABS(x - x2) % 4) { // fill cycle
             gDPSetCycleType(MASTERDL, G_CYC_FILL);
@@ -220,10 +223,12 @@ static void rgfx_draw_box(RgfxHud *c) {
         }
         gDPSetEnvColor(MASTERDL, c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]);
         gDPFillRectangle(MASTERDL, x, y, x2, y2);
-        gDPPipeSync(MASTERDL);
     } else { // we are using ortho triangles
         v = alloc_display_list(sizeof(Vtx) * 4);
     }
+    gDPPipeSync(MASTERDL);
+    gDPSetEnvColor(MASTERDL, 255, 255, 255, 255);
+    gSPDisplayList(MASTERDL, dl_hud_img_end);
 }
 
 static void rgfx_draw_text(RgfxHud *c) {
@@ -261,5 +266,6 @@ void rgfx_hud_draw() {
             }
             c++;
         }
+        sRgfxHudHead[i] = &sRgfxHudBuffer[i][0];
     }
 }
