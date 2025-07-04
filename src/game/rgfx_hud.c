@@ -1,6 +1,7 @@
 #include <ultra64.h>
+#include "init/memory.h"
 #include "rgfx_hud.h"
-
+#include "n64-string.h"
 #ifdef ULTRASM64_2
 #define RGFX_PRINTF n64_printf
 #else
@@ -23,7 +24,11 @@ static RgfxHud *alloc_hud(u8 layer) {
     if ((u32)sRgfxHudHead[layer] >= (u32)&sRgfxHudBuffer[layer] + RGFX_HUD_BUFFER_SIZE) {
         debug_crash("RGFX: Buffer too large.\n");
     }
-    return sRgfxHudHead[0]++;
+    return sRgfxHudHead[layer]++;
+}
+
+static inline u8 is_2d_element(RgfxHud *c) {
+    return c->z == 0 && c->pitch == 0 && c->yaw == 0 && c->roll == 0 && c->scale == 1.0f;
 }
 
 /*
@@ -45,7 +50,6 @@ static inline void set_default_color(u8 *color) {
 }
 
 static inline void set_default_3d_settings(RgfxHud *c) {
-    c->z = 0;
     c->pitch = 0;
     c->yaw = 0;
     c->roll = 0;
@@ -75,6 +79,8 @@ RgfxHud *rgfx_hud_create_txt(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z,
     c->z = z;
     set_default_3d_settings(c);
     set_default_color(&c->d.txt.color[0]);
+    c->d.txt.c = alloc_display_list(n64_strlen(s) + 1);
+    n64_strcpy(c->d.txt.c, s);
     return c;
 }
 
@@ -126,13 +132,26 @@ void rgfx_hud_draw() {
         RgfxHud *c = &sRgfxHudBuffer[i][0];
         while (c->type != RGFX_END) {
             switch (c->type) {
-                case RGFX_BOX: break;
-                case RGFX_TEXT: break;
+                case RGFX_BOX:
+                    if (is_2d_element(c)) {
+                    } else {
+                    }
+                break;
+                case RGFX_TEXT:
+                    if (is_2d_element(c)) {
+                    } else {
+                    }
+                break;
                 case RGFX_SPRITE: break;
+                    if (is_2d_element(c)) {
+                    } else {
+                    }
+                break;
                 case RGFX_SCISSOR: break;
                 case RGFX_GFX: break;
                 case RGFX_END: break; // avoids gcc warning
             }
+            c++;
         }
     }
 }
