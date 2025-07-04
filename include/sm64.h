@@ -432,6 +432,6 @@
 
 #define C_BUTTONS     (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS   )
 
-#define CRASH asm volatile("sw $zero, 0($zero)")
+#define CRASH asm volatile("sw $zero, 0($zero)"); __builtin_unreachable();
 
 #endif // SM64_H
