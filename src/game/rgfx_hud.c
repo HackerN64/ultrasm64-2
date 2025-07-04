@@ -1,9 +1,15 @@
 #include <ultra64.h>
 #include "init/memory.h"
+#include "game_init.h"
 #include "rgfx_hud.h"
 #include "n64-string.h"
 #include "n64-stdio.h"
 #include "sm64.h"
+
+/*
+ * RGFXHUD 5
+ * Features 3D transforms for menu elements.
+ */
 
 #define ULTRASM64_2
 
@@ -13,6 +19,11 @@
 #define RGFX_PRINTF osSyncPrintf
 #endif
 
+#define ABS(d)   ((d) > 0) ? (d) : -(d)
+
+#define CURR_BOX_COLOR       c->d.box.color[0], c->d.box.color[1], c->d.box.color[2]
+#define CURR_BOX_COLOR_ALPHA c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]
+
 static RgfxHud sRgfxHudBuffer[RGFX_HUD_LAYERS][RGFX_HUD_BUFFER_SIZE];
 static RgfxHud *sRgfxHudHead[RGFX_HUD_LAYERS] = { &sRgfxHudBuffer[0][0], &sRgfxHudBuffer[1][0], &sRgfxHudBuffer[2][0] };
 
@@ -20,7 +31,7 @@ static RgfxHud *sRgfxHudHead[RGFX_HUD_LAYERS] = { &sRgfxHudBuffer[0][0], &sRgfxH
 
 // platform independent assert
 
-static void debug_crash(char *s) {
+static inline void debug_crash(char *s) {
     RGFX_PRINTF(s);
     CRASH;
 }
@@ -36,17 +47,15 @@ static inline u8 is_2d_element(RgfxHud *c) {
     return c->z == 0 && c->pitch == 0 && c->yaw == 0 && c->roll == 0 && c->scale == 1.0f;
 }
 
-/*
- * if z == 0 && rotation == 0:
- * texture rect
- * else:
- * ortho
- *
- * if alpha == 255:
- * opaque rendermode
- * else:
- * transparent rendermode (no coverage)
- */
+static inline u8 is_parent_3d(RgfxHud *c) {
+    u8 ret;
+    if (c->parent != NULL) {
+        ret = is_parent_3d(c->parent);
+    } else {
+        ret = !is_2d_element(c);
+    }
+    return ret;
+}
 
 static inline void set_default_color(u8 *color) {
     for (u8 i = 0; i < 4; i++) {
@@ -154,8 +163,66 @@ static inline s16 get_true_z(RgfxHud *c, s16 z) {
 }
 
 static void rgfx_draw_box(RgfxHud *c) {
-    if (is_2d_element(c)) { // we are using fillrect
+    s16 x = get_true_x(c, 0);
+    s16 y = get_true_y(c, 0);
+    s16 z = get_true_z(c, 0);
+    s16 x2 = x + c->d.box.sX;
+    s16 y2 = y + c->d.box.sY;
+    s16 t;
+    Vtx *v;
+
+    // swap x/y with x2/y2 so that x/y is always < x2/y2
+
+    if (x2 < x) {
+        t = x2;
+        x2 = x;
+        x = t;
+    }
+
+    if (y2 < y) {
+        t = x2;
+        x2 = x;
+        x = t;
+    }
+
+    // don't go out of bounds
+
+    if (x < 0) {
+        x = 0;
+    }
+
+    if (y < 0) {
+        y = 0;
+    }
+
+    if (x2 > SCREEN_WIDTH) {
+        x2 = SCREEN_WIDTH;
+    }
+
+    if (y2 > SCREEN_HEIGHT) {
+        y2 = SCREEN_HEIGHT;
+    }
+    gDPPipeSync(MASTERDL);
+    if (is_2d_element(c) && !is_parent_3d(c)) { // we are using fillrect
+        if (c->d.box.color[3] == 255 && ABS(x - x2) % 4) { // fill cycle
+            gDPSetCycleType(MASTERDL, G_CYC_FILL);
+            gDPSetRenderMode(MASTERDL, G_RM_NOOP, G_RM_NOOP);
+            gDPSetFillColor(MASTERDL, (GPACK_RGBA5551(c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], 1) << 16) | GPACK_RGBA5551(c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], 1));
+            x2 -= 1;
+            y2 -= 1;
+        } else { // 1 cycle
+            gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
+            if (c->d.box.color[3] == 255) {
+                gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+            } else {
+                gDPSetRenderMode(MASTERDL, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            }
+        }
+        gDPSetEnvColor(MASTERDL, c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]);
+        gDPFillRectangle(MASTERDL, x, y, x2, y2);
+        gDPPipeSync(MASTERDL);
     } else { // we are using ortho triangles
+        v = alloc_display_list(sizeof(Vtx) * 4);
     }
 }
 

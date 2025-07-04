@@ -434,4 +434,6 @@
 
 #define CRASH *(vs8*)0 = 0;
 
+#define MASTERDL gDisplayListHead++
+
 #endif // SM64_H
