@@ -7,6 +7,8 @@
 
 #include "segment2.h"
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 /*
  * RGFXHUD 5
  * Features 3D transforms for menu elements.
@@ -28,14 +30,33 @@
 static RgfxHud sRgfxHudBuffer[RGFX_HUD_LAYERS][RGFX_HUD_BUFFER_SIZE];
 static RgfxHud *sRgfxHudHead[RGFX_HUD_LAYERS] = { &sRgfxHudBuffer[0][0], &sRgfxHudBuffer[1][0], &sRgfxHudBuffer[2][0] };
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+static Texture *sRgfxClownfontCharMap[] = {
 
-// platform independent assert
+};
 
-static inline void debug_crash(char *s) {
-    RGFX_PRINTF(s);
-    CRASH;
-}
+static Texture *sRgfxCursiveCharMap[] = {
+
+};
+
+static Texture *sRgfxCursiveHdCharMap[] = {
+
+};
+
+static Texture *sRgfxFasttextCharMap[] = {
+
+};
+
+static Texture *sRgfxHelveticaCharMap[] = {
+
+};
+
+static RgfxFontProperties sRgfxFontProperties[RGFX_HUD_FONTS] = {
+    { &sRgfxClownfontCharMap[0], { 16, 16 }, FALSE },
+    { &sRgfxCursiveCharMap[0], { 8, 12 }, TRUE },
+    { &sRgfxCursiveHdCharMap[0], { 8, 12 }, TRUE },
+    { &sRgfxFasttextCharMap[0], { 8, 8 }, FALSE },
+    { &sRgfxHelveticaCharMap[0], { 10, 10 }, FALSE },
+};
 
 static RgfxHud *alloc_hud(u8 layer) {
     n64_assert((u32)sRgfxHudHead[layer] <= (u32)&sRgfxHudBuffer[layer] + RGFX_HUD_BUFFER_SIZE);
@@ -171,7 +192,7 @@ static inline f32 get_true_scale(RgfxHud *c, f32 s) {
     return ret;
 }
 
-static inline void apply_parent_transform(RgfxHud *c) {
+static void apply_parent_transform(RgfxHud *c) {
     Mtx *matrix;
     if (c->parent != NULL) {
         apply_parent_transform(c->parent);
@@ -200,17 +221,6 @@ static inline void apply_parent_transform(RgfxHud *c) {
         guScale(matrix, get_true_scale(c, 1.0f), get_true_scale(c, 1.0f), get_true_scale(c, 1.0f));
         gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     }
-}
-
-void print_mtx(char *title, const Mtx *mtx) {
-    n64_printf("%s mtx\n", title);
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            n64_printf("0x%08x ", mtx->m[i][j]);
-        }
-        n64_printf("\n");
-    }
-    n64_printf("\n");
 }
 
 static void rgfx_draw_box(RgfxHud *c) {
@@ -323,6 +333,15 @@ static void rgfx_draw_box(RgfxHud *c) {
     gDPSetEnvColor(MASTERDL, 255, 255, 255, 255);
     gSPDisplayList(MASTERDL, dl_hud_img_end);
 }
+
+s16 get_text_width(RgfxHud *c) {
+    switch (c->d.txt.font) {
+
+    }
+}
+
+// scale 1.0f is equal to a height of 16px
+// if integer scaling is detected and we are NOT using 3d otherwise, fallback to texture rect
 
 static void rgfx_draw_text(RgfxHud *c) {
     if (is_2d_element(c)) { // we are using texture rectangles

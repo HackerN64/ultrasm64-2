@@ -5,6 +5,8 @@
 #define RGFX_HUD_BUFFER_SIZE 128
 #define RGFX_HUD_LAYERS      3
 
+#define RGFX_HUD_FONTS 5
+
 typedef enum {
     RGFX_BOX,
     RGFX_TEXT,
@@ -17,9 +19,16 @@ typedef enum {
 typedef enum {
     RGFX_FONT_CLOWNFONT,
     RGFX_FONT_CURSIVE,
+    RGFX_FONT_CURSIVE_HD,
     RGFX_FONT_FASTTEXT,
     RGFX_FONT_HELVETICA
 } RgfxFont;
+
+typedef struct {
+    Texture **charMap;
+    u8 size[2];
+    u8 flipped; // vanilla cursive font
+} RgfxFontProperties;
 
 typedef struct {
     s16 sX, sY;
