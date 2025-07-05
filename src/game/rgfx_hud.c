@@ -2,8 +2,7 @@
 #include "init/memory.h"
 #include "game_init.h"
 #include "rgfx_hud.h"
-#include "n64-string.h"
-#include "n64-stdio.h"
+#include "n64-libc.h"
 #include "sm64.h"
 
 #include "segment2.h"
@@ -39,9 +38,7 @@ static inline void debug_crash(char *s) {
 }
 
 static RgfxHud *alloc_hud(u8 layer) {
-    if ((u32)sRgfxHudHead[layer] >= (u32)&sRgfxHudBuffer[layer] + RGFX_HUD_BUFFER_SIZE) {
-        debug_crash("RGFX: Buffer too large.\n");
-    }
+    n64_assert((u32)sRgfxHudHead[layer] <= (u32)&sRgfxHudBuffer[layer] + RGFX_HUD_BUFFER_SIZE);
     return sRgfxHudHead[layer]++;
 }
 
@@ -164,6 +161,58 @@ static inline s16 get_true_z(RgfxHud *c, s16 z) {
     return ret;
 }
 
+static inline f32 get_true_scale(RgfxHud *c, f32 s) {
+    f32 ret = 1.0f;
+    if (c->parent != NULL) {
+        ret = get_true_scale(c->parent, s * c->scale);
+    } else {
+        ret = c->scale * s;
+    }
+    return ret;
+}
+
+static inline void apply_parent_transform(RgfxHud *c) {
+    Mtx *matrix;
+    if (c->parent != NULL) {
+        apply_parent_transform(c->parent);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guTranslate(matrix, c->x, -c->y, 0);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guRotate(matrix, (f32)c->roll / 182.0f, 0.0f, 0.0f, 1.0f);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guScale(matrix, get_true_scale(c, 1.0f), get_true_scale(c, 1.0f), get_true_scale(c, 1.0f));
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    } else {
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guTranslate(matrix, c->x + (c->d.box.sX / 2), SCREEN_HEIGHT - (c->y + (c->d.box.sY / 2)), 0);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guRotate(matrix, (f32)c->roll / 182.0f, 0.0f, 0.0f, 1.0f);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guScale(matrix, get_true_scale(c, 1.0f), get_true_scale(c, 1.0f), get_true_scale(c, 1.0f));
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    }
+}
+
+void print_mtx(char *title, const Mtx *mtx) {
+    n64_printf("%s mtx\n", title);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            n64_printf("0x%08x ", mtx->m[i][j]);
+        }
+        n64_printf("\n");
+    }
+    n64_printf("\n");
+}
+
 static void rgfx_draw_box(RgfxHud *c) {
     s16 x = get_true_x(c, 0);
     s16 y = get_true_y(c, 0);
@@ -189,24 +238,26 @@ static void rgfx_draw_box(RgfxHud *c) {
 
     // don't go out of bounds
 
-    if (x < 0) {
-        x = 0;
-    }
-
-    if (y < 0) {
-        y = 0;
-    }
-
-    if (x2 > SCREEN_WIDTH) {
-        x2 = SCREEN_WIDTH;
-    }
-
-    if (y2 > SCREEN_HEIGHT) {
-        y2 = SCREEN_HEIGHT;
-    }
     gDPPipeSync(MASTERDL);
     gDPSetCombineLERP(MASTERDL, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT);
+    gDPSetEnvColor(MASTERDL, c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]);
     if (is_2d_element(c) && !is_parent_3d(c)) { // we are using fillrect
+        if (x < 0) {
+            x = 0;
+        }
+
+        if (y < 0) {
+            y = 0;
+        }
+
+        if (x2 > SCREEN_WIDTH) {
+            x2 = SCREEN_WIDTH;
+        }
+
+        if (y2 > SCREEN_HEIGHT) {
+            y2 = SCREEN_HEIGHT;
+        }
+
         if (c->d.box.color[3] == 255 && ABS(x - x2) % 4) { // fill cycle
             gDPSetCycleType(MASTERDL, G_CYC_FILL);
             gDPSetRenderMode(MASTERDL, G_RM_NOOP, G_RM_NOOP);
@@ -221,10 +272,52 @@ static void rgfx_draw_box(RgfxHud *c) {
                 gDPSetRenderMode(MASTERDL, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             }
         }
-        gDPSetEnvColor(MASTERDL, c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]);
+
         gDPFillRectangle(MASTERDL, x, y, x2, y2);
     } else { // we are using ortho triangles
+        gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
+        if (c->d.box.color[3] == 255) {
+            gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        } else {
+            gDPSetRenderMode(MASTERDL, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        }
+
+        Mtx *matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+
+        guMtxIdent(matrix);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+
+        apply_parent_transform(c);
+
+        matrix = (Mtx *) alloc_display_list(sizeof(Mtx));
+        guOrtho(matrix, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -1000.0f, 1000.0f, 1.0f);
+        gSPPerspNormalize(MASTERDL, 0xFFFF);
+        gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(matrix), G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+
+        gSPClearGeometryMode(MASTERDL, G_LIGHTING);
         v = alloc_display_list(sizeof(Vtx) * 4);
+
+        v[0].v.ob[0] = -(x - x2) / 2; // 0 top left
+        v[0].v.ob[1] = -(y - y2) / 2;
+        v[0].v.ob[2] = z;
+
+        v[1].v.ob[0] = (x - x2) / 2; // 1 top right
+        v[1].v.ob[1] = -(y - y2) / 2;
+        v[1].v.ob[2] = z;
+
+        v[2].v.ob[0] = -(x - x2) / 2; // 2 bottom left
+        v[2].v.ob[1] = (y - y2) / 2;
+        v[2].v.ob[2] = z;
+
+        v[3].v.ob[0] = (x - x2) / 2; // 3 bottom right
+        v[3].v.ob[1] = (y - y2) / 2;
+        v[3].v.ob[2] = z;
+
+        gSPVertex(MASTERDL, v, 4, 0);
+        gSP2Triangles(MASTERDL, 1, 2, 0, 0, /* */ 2, 1, 3, 0);
+        gSPPopMatrix(MASTERDL, G_MTX_PROJECTION);
+        gSPPopMatrix(MASTERDL, G_MTX_MODELVIEW);
     }
     gDPPipeSync(MASTERDL);
     gDPSetEnvColor(MASTERDL, 255, 255, 255, 255);

@@ -62,4 +62,19 @@ RgfxHud *rgfx_hud_create_txt(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z,
 RgfxHud *rgfx_hud_create_sprite(RgfxHud *parent,  u8 layer, s16 x, s16 y, s16 z, s16 sX, s16 sY, u8 fmt, Texture *sprite);
 RgfxHud *rgfx_hud_create_scissor(RgfxHud *parent, u8 layer, s16 x, s16 y, s16 sX, s16 sY);
 RgfxHud *rgfx_hud_create_gfx(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z, Gfx *gfx);
+
+// inline helper functions
+
+static inline void rgfx_hud_set_color(RgfxHud *c, u8 r, u8 g, u8 b, u8 a) {
+    if (c->type == RGFX_BOX) {
+        c->d.box.color[0] = r; c->d.box.color[1] = g; c->d.box.color[2] = b; c->d.box.color[3] = a;
+    } else if (c->type == RGFX_TEXT) {
+        c->d.txt.color[0] = r; c->d.txt.color[1] = g; c->d.txt.color[2] = b; c->d.txt.color[3] = a;
+    }
+}
+
+static inline void rgfx_hud_set_rotation(RgfxHud *c, s16 pitch, s16 yaw, s16 roll) {
+    c->pitch = pitch; c->yaw = yaw; c->roll = roll;
+}
+
 void rgfx_hud_draw();
