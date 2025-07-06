@@ -24,9 +24,6 @@
 
 #define ABS(d)   ((d) > 0) ? (d) : -(d)
 
-#define CURR_BOX_COLOR       c->d.box.color[0], c->d.box.color[1], c->d.box.color[2]
-#define CURR_BOX_COLOR_ALPHA c->d.box.color[0], c->d.box.color[1], c->d.box.color[2], c->d.box.color[3]
-
 static RgfxHud sRgfxHudBuffer[RGFX_HUD_LAYERS][RGFX_HUD_BUFFER_SIZE];
 static RgfxHud *sRgfxHudHead[RGFX_HUD_LAYERS] = { &sRgfxHudBuffer[0][0], &sRgfxHudBuffer[1][0], &sRgfxHudBuffer[2][0] };
 
@@ -46,8 +43,107 @@ static Texture *sRgfxFasttextCharMap[] = {
 
 };
 
-static Texture *sRgfxHelveticaCharMap[] = {
-
+static Texture *sRgfxInterCharMap[] = {
+    NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL,
+    /* \n */ NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL,
+    /* ! */
+    /* " */
+    /* # */
+    /* $ */
+    /* % */
+    /* & */
+    /* ' */
+    /* ( */
+    /* ) */
+    /* * */
+    /* + */
+    /* , */
+    /* - */
+    /* . */
+    /* / */
+    /* 0 */
+    /* 1 */
+    /* 2 */
+    /* 3 */
+    /* 4 */
+    /* 5 */
+    /* 6 */
+    /* 7 */
+    /* 8 */
+    /* 9 */
+    /* : */
+    /* ; */
+    /* < */
+    /* = */
+    /* > */
+    /* ? */
+    /* @ */
+    /* A */
+    /* B */
+    /* C */
+    /* D */
+    /* E */
+    /* F */
+    /* G */
+    /* H */
+    /* I */
+    /* J */
+    /* K */
+    /* L */
+    /* M */
+    /* O */
+    /* P */
+    /* Q */
+    /* R */
+    /* S */
+    /* T */
+    /* U */
+    /* V */
+    /* W */
+    /* X */
+    /* Y */
+    /* Z */
+    /* [ */
+    /* \ */ NULL,
+    /* ] */
+    /* ^ */
+    /* _ */
+    /* ` */
+    /* a */
+    /* b */
+    /* c */
+    /* d */
+    /* e */
+    /* f */
+    /* g */
+    /* h */
+    /* i */
+    /* j */
+    /* k */
+    /* l */
+    /* m */
+    /* o */
+    /* p */
+    /* q */
+    /* r */
+    /* s */
+    /* t */
+    /* u */
+    /* v */
+    /* w */
+    /* x */
+    /* y */
+    /* z */
+    /* { */
+    /* | */
+    /* } */
+    /* ~ */
+    /* DEL */ NULL
 };
 
 static RgfxFontProperties sRgfxFontProperties[RGFX_HUD_FONTS] = {
@@ -55,7 +151,7 @@ static RgfxFontProperties sRgfxFontProperties[RGFX_HUD_FONTS] = {
     { &sRgfxCursiveCharMap[0], { 8, 12 }, TRUE },
     { &sRgfxCursiveHdCharMap[0], { 8, 12 }, TRUE },
     { &sRgfxFasttextCharMap[0], { 8, 8 }, FALSE },
-    { &sRgfxHelveticaCharMap[0], { 10, 10 }, FALSE },
+    { &sRgfxInterCharMap[0], { 32, 32 }, FALSE },
 };
 
 static RgfxHud *alloc_hud(u8 layer) {
@@ -346,6 +442,7 @@ s16 get_text_width(RgfxHud *c) {
 static void rgfx_draw_text(RgfxHud *c) {
     if (is_2d_element(c)) { // we are using texture rectangles
     } else { // we are using ortho triangles
+
     }
 }
 

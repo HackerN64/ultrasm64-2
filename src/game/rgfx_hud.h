@@ -21,7 +21,7 @@ typedef enum {
     RGFX_FONT_CURSIVE,
     RGFX_FONT_CURSIVE_HD,
     RGFX_FONT_FASTTEXT,
-    RGFX_FONT_HELVETICA
+    RGFX_FONT_INTER
 } RgfxFont;
 
 typedef struct {
