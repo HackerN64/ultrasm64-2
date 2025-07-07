@@ -5,6 +5,7 @@
 #include "gfx_dimensions.h"
 #include "game_init.h"
 #include "init/memory.h"
+#include "rgfx_hud.h"
 #include "print.h"
 #include "segment2.h"
 
@@ -401,6 +402,7 @@ void clip_to_bounds(s32 *x, s32 *y) {
 /**
  * Renders the glyph that's set at the given position.
  */
+
 #ifdef VERSION_CN
 void render_textrect(s32 x, s32 y, s32 pos, s32 width) {
     s32 rectBaseX = x + pos * width;
@@ -430,25 +432,19 @@ void render_text_labels(void) {
     s32 i;
     s32 j;
     s8 glyphIndex;
-    Mtx *mtx;
 
     if (sTextLabelsCount == 0) {
         return;
     }
 
-    mtx = alloc_display_list(sizeof(*mtx));
-
-    if (mtx == NULL) {
-        sTextLabelsCount = 0;
-        return;
-    }
-
-    guOrtho(mtx, 0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, -10.0f, 10.0f, 1.0f);
-    gSPPerspNormalize((Gfx *) (MASTERDL), 0xFFFF);
-    gSPMatrix(MASTERDL, VIRTUAL_TO_PHYSICAL(mtx), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPDisplayList(MASTERDL, dl_hud_img_begin);
 
     for (i = 0; i < sTextLabelsCount; i++) {
+        gDPSetAlphaCompare(MASTERDL, G_AC_NONE);
+        gDPSetCycleType(MASTERDL, G_CYC_1CYCLE);
+        clear_cvg(sTextLabels[i]->x - 2, 226 - sTextLabels[i]->y, sTextLabels[i]->x + (sTextLabels[i]->length * 12) + 3, 242 - sTextLabels[i]->y);
+        gDPSetCycleType(MASTERDL, G_CYC_COPY);
+        gDPSetAlphaCompare(MASTERDL, G_AC_THRESHOLD);
         for (j = 0; j < sTextLabels[i]->length; j++) {
 #ifdef VERSION_CN
             if ((u8) sTextLabels[i]->buffer[j] < 0xA0) {
@@ -520,6 +516,5 @@ void render_text_labels(void) {
     }
 
     gSPDisplayList(MASTERDL, dl_hud_img_end);
-
     sTextLabelsCount = 0;
 }

@@ -66,6 +66,8 @@ typedef struct {
     RgfxHudData d;
 } RgfxHud;
 
+void clear_cvg(u16 x, u16 y, u16 x2, u16 y2);
+
 RgfxHud *rgfx_hud_create_box(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z, s16 sX, s16 sY);
 RgfxHud *rgfx_hud_create_txt(RgfxHud *parent,     u8 layer, s16 x, s16 y, s16 z, RgfxFont font, char *s);
 RgfxHud *rgfx_hud_create_sprite(RgfxHud *parent,  u8 layer, s16 x, s16 y, s16 z, s16 sX, s16 sY, u8 fmt, Texture *sprite);

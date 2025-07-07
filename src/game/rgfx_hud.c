@@ -288,6 +288,21 @@ static inline f32 get_true_scale(RgfxHud *c, f32 s) {
     return ret;
 }
 
+/**
+ * Clears coverage for a given area.
+ * Prevents "warping" when HUD elements "intersect" with polygon edges.
+ */
+
+void clear_cvg(u16 x, u16 y, u16 x2, u16 y2) {
+    gDPPipeSync(MASTERDL);
+    gDPSetCombineMode(MASTERDL, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetRenderMode(MASTERDL, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetPrimColor(MASTERDL, 0, 0, 0, 0, 0, 0);
+    gDPFillRectangle(MASTERDL, x, y, x2, y2);
+    gDPSetCombineMode(MASTERDL, G_CC_SHADE, G_CC_SHADE);
+    gDPSetRenderMode(MASTERDL, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+}
+
 static void apply_parent_transform(RgfxHud *c) {
     Mtx *matrix;
     if (c->parent != NULL) {
