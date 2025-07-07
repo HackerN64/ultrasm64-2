@@ -200,11 +200,8 @@ SECTIONS
         BUILD_DIR/src/menu*.o(.text);
         BUILD_DIR/libgoddard.a:*.o(.text);
         BUILD_DIR/libgoddard.a:dynlist_proc.o(.text);
-
-        /* data, rodata, per file */
         BUILD_DIR/src/menu*.o(.data*);
         BUILD_DIR/src/menu*.o(.rodata*);
-        /* goddard subsystem data */
         BUILD_DIR/libgoddard.a:*.o(.data*);
         BUILD_DIR/libgoddard.a:dynlist_proc.o(.data*);
         BUILD_DIR/libgoddard.a:*.o(.rodata*);
@@ -221,7 +218,6 @@ SECTIONS
     }
     END_NOLOAD(goddard)
 
-    /* 0x268020 0x268020-0 [0] */
     BEGIN_SEG(intro, 0x14000000)
     {
         BUILD_DIR/levels/intro/script.o(.data);
@@ -259,16 +255,9 @@ SECTIONS
     }
     END_SEG(scripts)
 
-    MIO0_SEG(water_skybox, 0x0A000000)
-    MIO0_SEG(ccm_skybox, 0x0A000000)
-    MIO0_SEG(clouds_skybox, 0x0A000000)
-    MIO0_SEG(bitfs_skybox, 0x0A000000)
-    MIO0_SEG(wdw_skybox, 0x0A000000)
-    MIO0_SEG(cloud_floor_skybox, 0x0A000000)
-    MIO0_SEG(ssl_skybox, 0x0A000000)
-    MIO0_SEG(bbh_skybox, 0x0A000000)
-    MIO0_SEG(bidw_skybox, 0x0A000000)
-    MIO0_SEG(bits_skybox, 0x0A000000)
+#define SKYBOX_LD
+#include "skyboxes.h"
+#undef SKYBOX_LD
 
     // Texture bins
     MIO0_SEG(fire, 0x09000000)
@@ -293,7 +282,6 @@ SECTIONS
 #undef STUB_LEVEL
 #undef DEFINE_LEVEL
 
-    /* 4E9FA0-? [?] */
     BEGIN_SEG(assets, __romPos)
     {
         BUILD_DIR/assets/mario_anim_data.o(.data);

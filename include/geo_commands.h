@@ -10,17 +10,11 @@
 #include "game/mario_misc.h"
 #include "game/mario_actions_cutscene.h"
 
-// sky background params
-#define BACKGROUND_OCEAN_SKY        0
-#define BACKGROUND_FLAMING_SKY      1
-#define BACKGROUND_UNDERWATER_CITY  2
-#define BACKGROUND_BELOW_CLOUDS     3
-#define BACKGROUND_SNOW_MOUNTAINS   4
-#define BACKGROUND_DESERT           5
-#define BACKGROUND_HAUNTED          6
-#define BACKGROUND_GREEN_SKY        7
-#define BACKGROUND_ABOVE_CLOUDS     8
-#define BACKGROUND_PURPLE_SKY       9
+enum SkyBackgroundParams {
+#define SKYBOX_ENUM
+#include "skyboxes.h"
+#undef SKYBOX_ENUM
+};
 
 // geo layout macros
 
