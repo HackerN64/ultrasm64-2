@@ -9,8 +9,6 @@ OUTPUT_ARCH (mips)
 #include "config.h"
 #include "ld.h"
 
-EXTERN(assertMsg);
-
 SECTIONS
 {
     __romPos = 0;
@@ -91,14 +89,6 @@ SECTIONS
     BEGIN_NOLOAD(main)
     {
         BUILD_DIR/src/init*.o(.bss*);
-#ifdef VERSION_SH
-        AUDIO_DIR/port.o(.bss*);
-#endif
-        AUDIO_DIR/globals_start.o(.bss*);
-        AUDIO_DIR/synthesis.o(.bss*);
-        AUDIO_DIR/heap.o(.bss*);
-        AUDIO_DIR/load.o(.bss*);
-        AUDIO_DIR/data.o(.bss*);
         AUDIO_DIR*.o(.bss*);
         BUILD_DIR/src/audio/external.o(.bss*);
         BUILD_DIR/n64-libc.a:*.o(.bss*);
@@ -142,9 +132,6 @@ SECTIONS
     __mainPoolSize = RAM_END - .;
 
    ASSERT((. <= (SEG_POOL_START + POOL_SIZE)), "Error: extended past pool end.")
-
-   __expansionRamStart = 0x80400000;
-   ASSERT((. <= __expansionRamStart), "Error: RDRAM expanded into Expansion RAM, despite Expansion RAM not being defined.")
 
     BEGIN_SEG(entry, 0x10000000)
     {
@@ -190,62 +177,45 @@ SECTIONS
     BEGIN_SEG(behavior, 0x13000000)
     {
         BUILD_DIR/data/behavior_data.o(.data);
+        . = ALIGN(0x10);
     }
     END_SEG(behavior)
 
-    /* 0x8016F000 21D7D0-255EC0 [386F0] */
+    BEGIN_SEG(gd_dynlists, 0x04000000)
+    {
+        EXCLUDE_FILE(BUILD_DIR/libgoddard.a:dynlist_proc.o)
+        BUILD_DIR/libgoddard.a:dynlist_*.o(.data*);
+        BUILD_DIR/libgoddard.a:dynlists_*.o(.data*);
+        BUILD_DIR/libgoddard.a:anim_*.o(.data*);
+        EXCLUDE_FILE(BUILD_DIR/libgoddard.a:dynlist_proc.o)
+        BUILD_DIR/libgoddard.a:dynlist_*.o(.rodata*);
+        BUILD_DIR/libgoddard.a:dynlists_*.o(.rodata*);
+        BUILD_DIR/libgoddard.a:anim_*.o(.rodata*);
+        . = ALIGN(0x10);
+    }
+    END_SEG(gd_dynlists)
+
     BEGIN_SEG(goddard, SEG_GODDARD)
     {
         BUILD_DIR/src/menu*.o(.text);
         BUILD_DIR/libgoddard.a:*.o(.text);
+        BUILD_DIR/libgoddard.a:dynlist_proc.o(.text);
+
         /* data, rodata, per file */
         BUILD_DIR/src/menu*.o(.data*);
         BUILD_DIR/src/menu*.o(.rodata*);
         /* goddard subsystem data */
-        BUILD_DIR/libgoddard.a:gd_main.o(.data*);
-        BUILD_DIR/libgoddard.a:draw_objects.o(.data*);
-        BUILD_DIR/libgoddard.a:objects.o(.data*);
-        BUILD_DIR/libgoddard.a:particles.o(.data*);
+        BUILD_DIR/libgoddard.a:*.o(.data*);
         BUILD_DIR/libgoddard.a:dynlist_proc.o(.data*);
-        BUILD_DIR/libgoddard.a:debug_utils.o(.data*);
-        BUILD_DIR/libgoddard.a:joints.o(.data*);
-        BUILD_DIR/libgoddard.a:shape_helper.o(.data*);
-        BUILD_DIR/libgoddard.a:renderer.o(.data*);
-        /* goddard subsystem rodata */
-        BUILD_DIR/libgoddard.a:gd_main.o(.rodata*);
-        BUILD_DIR/libgoddard.a:gd_memory.o(.rodata*);
-        BUILD_DIR/libgoddard.a:draw_objects.o(.rodata*);
-        BUILD_DIR/libgoddard.a:objects.o(.rodata*);
-        BUILD_DIR/libgoddard.a:skin_movement.o(.rodata*);
-        BUILD_DIR/libgoddard.a:particles.o(.rodata*);
+        BUILD_DIR/libgoddard.a:*.o(.rodata*);
         BUILD_DIR/libgoddard.a:dynlist_proc.o(.rodata*);
-        BUILD_DIR/libgoddard.a:old_menu.o(.rodata*);
-        BUILD_DIR/libgoddard.a:debug_utils.o(.rodata*);
-        BUILD_DIR/libgoddard.a:joints.o(.rodata*);
-        BUILD_DIR/libgoddard.a:skin.o(.rodata*);
-        BUILD_DIR/libgoddard.a:gd_math.o(.rodata*);
-        BUILD_DIR/libgoddard.a:shape_helper.o(.rodata*);
-        BUILD_DIR/libgoddard.a:renderer.o(.rodata*);
         . = ALIGN(0x10);
     }
+
     END_SEG(goddard)
     BEGIN_NOLOAD(goddard)
     {
         BUILD_DIR/src/menu*.o(.bss*);
-        BUILD_DIR/libgoddard.a:gd_main.o(.bss*);
-        BUILD_DIR/libgoddard.a:gd_memory.o(.bss*);
-        BUILD_DIR/libgoddard.a:sfx.o(.bss*);
-        BUILD_DIR/libgoddard.a:draw_objects.o(.bss*);
-        BUILD_DIR/libgoddard.a:objects.o(.bss*);
-        BUILD_DIR/libgoddard.a:skin_movement.o(.bss*);
-        BUILD_DIR/libgoddard.a:particles.o(.bss*);
-        BUILD_DIR/libgoddard.a:dynlist_proc.o(.bss*);
-        BUILD_DIR/libgoddard.a:old_menu.o(.bss*);
-        BUILD_DIR/libgoddard.a:debug_utils.o(.bss*);
-        BUILD_DIR/libgoddard.a:joints.o(.bss*);
-        BUILD_DIR/libgoddard.a:skin.o(.bss*);
-        BUILD_DIR/libgoddard.a:shape_helper.o(.bss*);
-        BUILD_DIR/libgoddard.a:renderer.o(.bss*);
         BUILD_DIR/libgoddard.a:*.o(.bss*);
         . = ALIGN(0x10);
     }
@@ -267,29 +237,6 @@ SECTIONS
 
     MIO0_SEG(debug_level_select, 0x07000000)
     MIO0_SEG(title_screen_bg, 0x0A000000)
-
-    /* 271B20-2A42A0 [32780] */
-    BEGIN_SEG(gd_dynlists, 0x04000000)
-    {
-        BUILD_DIR/libgoddard.a:dynlist_test_cube.o(.data);
-        BUILD_DIR/libgoddard.a:dynlist_unused.o(.data);
-        BUILD_DIR/libgoddard.a:dynlist_mario_face.o(.data);
-        BUILD_DIR/libgoddard.a:dynlists_mario_eyes.o(.data);
-        BUILD_DIR/libgoddard.a:dynlists_mario_eyebrows_mustache.o(.data);
-        BUILD_DIR/libgoddard.a:dynlist_mario_master.o(.data);
-        BUILD_DIR/libgoddard.a:anim_mario_mustache_right.o(.data);
-        BUILD_DIR/libgoddard.a:anim_mario_mustache_left.o(.data);
-        BUILD_DIR/libgoddard.a:anim_mario_lips_1.o(.data);
-        BUILD_DIR/libgoddard.a:anim_mario_lips_2.o(.data);
-        BUILD_DIR/libgoddard.a:anim_mario_eyebrows_1.o(.data);
-        BUILD_DIR/libgoddard.a:anim_group_1.o(.data);
-        BUILD_DIR/libgoddard.a:anim_group_2.o(.data);
-        BUILD_DIR/libgoddard.a:dynlist_test_cube.o(.rodata*);
-        BUILD_DIR/libgoddard.a:dynlist_unused.o(.rodata*);
-        BUILD_DIR/libgoddard.a:*.o(.data);
-        BUILD_DIR/libgoddard.a:*.o(.rodata);
-    }
-    END_SEG(gd_dynlists)
 
     gMainLevels = __romPos;
 

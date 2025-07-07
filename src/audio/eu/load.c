@@ -74,9 +74,6 @@ s8 gSoundMode;
 
 s8 gAudioUpdatesPerFrame;
 
-extern u64 gAudioGlobalsStartMarker;
-extern u64 gAudioGlobalsEndMarker;
-
 extern u8 gSoundDataADSR[]; // sound_data.ctl
 extern u8 gSoundDataRaw[];  // sound_data.tbl
 extern u8 gMusicData[];     // sequences.s
@@ -714,29 +711,11 @@ void audio_init() {
         ((u64 *) gAudioHeap)[i] = 0;
     }
 
-#ifdef TARGET_N64
-    // It seems boot.s doesn't clear the .bss area for audio, so do it here.
-    lim3 = ((uintptr_t) &gAudioGlobalsEndMarker - (uintptr_t) &gAudioGlobalsStartMarker) / 8;
-    ptr64 = &gAudioGlobalsStartMarker;
-    for (k = lim3; k >= 0; k--) {
-        *ptr64++ = 0;
-    }
-#endif
-
     D_EU_802298D0 = 20.03042f;
     gRefreshRate = 50;
     port_eu_init();
     if (k) {
     }
-
-#ifdef TARGET_N64
-    eu_stubbed_printf_3(
-        "Clear Workarea %x -%x size %x \n",
-        (uintptr_t) &gAudioGlobalsStartMarker,
-        (uintptr_t) &gAudioGlobalsEndMarker,
-        (uintptr_t) &gAudioGlobalsEndMarker - (uintptr_t) &gAudioGlobalsStartMarker
-    );
-#endif
 
     eu_stubbed_printf_1("AudioHeap is %x\n", gAudioHeapSize);
 

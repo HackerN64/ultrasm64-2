@@ -386,5 +386,3 @@ s16 gAiBufferLengths[NUMAIBUFFERS];
 u32 gAudioRandom;
 
 s32 gAudioErrorFlags;
-
-u64 gAudioGlobalsEndMarker;

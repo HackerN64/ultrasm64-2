@@ -570,5 +570,3 @@ OSMesgQueue *OSMesgQueue2;
 OSMesg OSMesg3[1];
 OSMesgQueue OSMesgQueue3Data;
 OSMesgQueue *OSMesgQueue3;
-
-u64 gAudioGlobalsEndMarker;
