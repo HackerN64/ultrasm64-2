@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://gitlab.com/parallel-launcher/libpl2
 	branch = master
-	commit = 58e4fa38badf31b732f853ab15689a55db65f3d2
+	commit = 45324e7ac944b9cd92568dca6bc93433f54711a9
 	parent = 221c63e659988b7f37df82bd4897dc08fa70e82a
 	method = merge
 	cmdver = 0.4.9
