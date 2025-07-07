@@ -1,6 +1,9 @@
 #include "n64-stdlib.h"
 
+#include "n64-stdckdint.h"
+#include "n64-stdbool.h"
 #include "n64-stddef.h"
+#include "n64-ctype.h"
 #include "n64-util.h"
 
 typedef void(*memswp_func_t)( void*, void*, unsigned int );
@@ -101,6 +104,165 @@ void *n64_bsearch( const void *key, const void *ptr, unsigned int count, unsigne
 	}
 
 	return NULL;
+}
+
+int n64_atoi( const char *str ) {
+	int x = 0;
+	while( n64_isspace( *str ) ) str++;
+	const char sign = *str;
+	if( sign == '+' || sign == '-' ) str++;
+	while( n64_isdigit( *str ) ) {
+		x *= 10;
+		x += (int)(*str++ - '0');
+	}
+	return (sign == '-') ? -x : x;
+}
+
+long long n64_atoll( const char *str ) {
+	long long x = 0ll;
+	while( n64_isspace( *str ) ) str++;
+	const char sign = *str;
+	if( sign == '+' || sign == '-' ) str++;
+	while( n64_isdigit( *str ) ) {
+		x *= 10ll;
+		x += (long long)(*str++ - '0');
+	}
+	return (sign == '-') ? -x : x;
+}
+
+#define N64_STRTO_COMMON \
+	n64_bool overflow = false;\
+	n64_bool negative = false;\
+\
+	while( n64_isspace( *str ) ) str++;\
+	if( *str == '+' ) {\
+		str++;\
+	} else if( *str == '-' ) {\
+		negative = true;\
+		str++;\
+	}\
+\
+	if( *str == '0' ) {\
+		str++;\
+		if( *str == 'x' || *str == 'X' ) {\
+			if( base == 0 ) {\
+				base = 16;\
+				str++;\
+			} else if( base == 16 ) {\
+				str++;\
+			} else if( base < 34 ) {\
+				if( str_end ) *str_end = (char*)str;\
+				return 0;\
+			}\
+		} else if( base == 0 ) {\
+			base = 8;\
+		}\
+	}\
+\
+	if( base == 0 ) {\
+		base = 10;\
+	}\
+\
+	while( true ) {\
+		const char c = *str;\
+\
+		if( n64_isdigit( c ) ) {\
+			digit = (int)(c - '0');\
+		} else if( n64_islower( c ) ) {\
+			digit = 10 + (int)(c - 'a');\
+		} else if( n64_isupper( c ) ) {\
+			digit = 10 + (int)(c - 'A');\
+		} else break;\
+\
+		if( digit >= base ) break;\
+\
+		if( overflow ) {\
+			str++;\
+			continue;\
+		}\
+\
+		if( n64_ckd_mul( &x, x, base ) ) {\
+			overflow = true;\
+			str++;\
+			continue;\
+		}\
+\
+		overflow = n64_ckd_add( &x, x, digit );\
+		str++;\
+	}
+
+int n64_strtoi( const char *str, char **str_end, int base ) {
+	if( base < 0 || base > 36 ) {
+		if( str_end ) *str_end = (char*)str;
+		return 0;
+	}
+
+	int x = 0;
+	int digit = 0;
+
+	N64_STRTO_COMMON
+
+	if( str_end ) *str_end = (char*)str;
+	if( overflow ) return negative ? -0x80000000 : 0x7fffffff;
+	return negative ? -x : x;
+}
+
+__attribute__((always_inline))
+static inline unsigned int n64_strtoui_impl( const char *str, char **str_end, unsigned int base ) {
+	unsigned int x = 0;
+	unsigned int digit = 0;
+
+	N64_STRTO_COMMON
+
+	if( str_end ) *str_end = (char*)str;
+	if( overflow ) return 0x7fffffffu;
+	return negative ? -x : x;
+}
+
+unsigned int n64_strtoui( const char *str, char **str_end, int base ) {
+	if( base < 0 || base > 36 ) {
+		if( str_end ) *str_end = (char*)str;
+		return 0u;
+	}
+
+	return n64_strtoui_impl( str, str_end, (unsigned int)base );
+}
+
+long long n64_strtoll( const char *str, char **str_end, int base ) {
+	if( base < 0 || base > 36 ) {
+		if( str_end ) *str_end = (char*)str;
+		return 0;
+	}
+
+	long long x = 0ll;
+	int digit = 0;
+
+	N64_STRTO_COMMON
+
+	if( str_end ) *str_end = (char*)str;
+	if( overflow ) return negative ? -0x8000000000000000ll : 0x7fffffffffffffffll;
+	return negative ? -x : x;
+}
+
+__attribute__((always_inline))
+static inline unsigned long long n64_strtoull_impl( const char *str, char **str_end, unsigned int base ) {
+	unsigned long long x = 0;
+	unsigned int digit = 0;
+
+	N64_STRTO_COMMON
+
+	if( str_end ) *str_end = (char*)str;
+	if( overflow ) return 0x7fffffffffffffffu;
+	return negative ? -x : x;
+}
+
+unsigned long long n64_strtoull( const char *str, char **str_end, int base ) {
+	if( base < 0 || base > 36 ) {
+		if( str_end ) *str_end = (char*)str;
+		return 0u;
+	}
+
+	return n64_strtoull_impl( str, str_end, (unsigned int)base );
 }
 
 static unsigned int g_randi = 24u;

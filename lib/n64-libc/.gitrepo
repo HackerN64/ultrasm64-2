@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://gitlab.com/mpharoah/n64-libc
 	branch = main
-	commit = 70270d60f9b13d3cd896eaa8aa0a043992a823fd
+	commit = ef942de8e17baf476212e9e07932dfc63e736112
 	parent = 4c89989f6f2ef03e71fc89e33e4e94fa067fda04
 	method = merge
 	cmdver = 0.4.9

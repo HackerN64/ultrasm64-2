@@ -27,6 +27,36 @@ void n64_qsort( void *ptr, unsigned int count, unsigned int size, int(*comp)(con
 __attribute__((nonnull(2, 5), alloc_align(4), alloc_size(3, 4), warn_unused_result))
 void *n64_bsearch( const void *key, const void *ptr, unsigned int count, unsigned int size, int(*comp)(const void*, const void*) );
 
+__attribute__((const, warn_unused_result, always_inline))
+static inline int n64_abs( int n ) {
+	return (n < 0) ? -n : n;
+}
+
+__attribute__((const, warn_unused_result, always_inline))
+static inline long long n64_llabs( long long n ) {
+	return (n < 0ll) ? -n : n;
+}
+
+__attribute__((pure, nonnull(1), warn_unused_result))
+int n64_atoi( const char *str );
+
+__attribute__((pure, nonnull(1), warn_unused_result))
+long long n64_atoll( const char *str );
+
+// Extension. Same as stroll, but returns an 32-bit int
+__attribute__((pure, nonnull(1), access(read_write, 2)))
+int n64_strtoi( const char *str, char **str_end, int base );
+
+// Extension. Same as stroull, but returns an 32-bit unsigned int
+__attribute__((pure, nonnull(1), access(read_write, 2)))
+unsigned int n64_strtoui( const char *str, char **str_end, int base );
+
+__attribute__((pure, nonnull(1), access(read_write, 2)))
+long long n64_strtoll( const char *str, char **str_end, int base );
+
+__attribute__((pure, nonnull(1), access(read_write, 2)))
+unsigned long long n64_strtoull( const char *str, char **str_end, int base );
+
 __attribute__((flatten))
 void n64_srand( unsigned int seed );
 
