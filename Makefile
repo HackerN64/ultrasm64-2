@@ -52,7 +52,7 @@ endif
 
 ifeq ($(RELEASE), debug)
   OPT_FLAGS := -Og -ggdb3
-	DEFINES +=  _DEBUG=1
+  DEFINES +=  _DEBUG=1
 else ifeq ($(RELEASE), general)
   OPT_FLAGS := -Os -ggdb3
 else ifeq ($(RELEASE), final)
