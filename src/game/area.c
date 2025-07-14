@@ -22,7 +22,6 @@
 #include "level_table.h"
 #include "dialog_ids.h"
 
-#include <prevent_bss_reordering.h>
 
 struct SpawnInfo gPlayerSpawnInfos[1];
 struct GraphNode *D_8033A160[0x100];
