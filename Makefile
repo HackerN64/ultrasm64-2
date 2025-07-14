@@ -5,14 +5,43 @@ include util.mk
 # Default target
 default: all
 
+# Preprocessor definitions
+DEFINES :=
+
 # Use Libdragon IPL3
 # WARNING: This CAN and WILL break certain (most) emulators.
 # Use if you care about console or ares boot times.
 
-LIBDRAGON_IPL3 := 0
+LIBDRAGON_IPL3 ?= 0
 
-# Preprocessor definitions
-DEFINES :=
+# Build types
+# debug   - Debug build
+# general - General release build
+# final   - Final release build with no crash screen, game will reset upon exception.
+
+RELEASE ?= debug
+
+# Benchmark build
+# Builds a benchmark build that runs a 120 star TAS for automated verification.
+# This setting is also in include/cfg/benchmark.h, but provided here as well for automation purposes.
+
+BENCHMARK ?= 0
+
+ifeq ($(BENCHMARK), 1)
+	DEFINES += CFG_BENCHMARK=1
+  RELEASE = general
+endif
+
+ifeq ($(RELEASE), debug)
+  OPT_FLAGS := -Og -ggdb3
+	DEFINES +=  _DEBUG=1
+else ifeq ($(RELEASE), general)
+  OPT_FLAGS := -Os -ggdb3
+else ifeq ($(RELEASE), final)
+  OPT_FLAGS := -Os
+else
+  $(error Invalid build release setting.)
+endif
 
 ifeq ($(LIBDRAGON_IPL3), 1)
   DEFINES += LIBDRAGON_IPL3=1
@@ -87,17 +116,9 @@ else ifeq ($(GRUCODE),f3dzex) # Fast3DZEX (2.0J / Animal Forest - Dōbutsu no Mo
   DEFINES += F3DZEX_GBI_2=1 F3DEX_GBI_2=1 F3DEX_GBI_SHARED=1
 endif
 
-NON_MATCHING := 1
 MIPSISET     := -mips3
-OPT_FLAGS    := -Os
 
-
-# NON_MATCHING - whether to build a matching, identical copy of the ROM
-#   1 - enable some alternate, more portable code that does not produce a matching ROM
-#   0 - build a matching ROM
-NON_MATCHING ?= 0
-$(eval $(call validate-option,NON_MATCHING,0 1))
-
+NON_MATCHING := 1
 ifeq ($(TARGET_N64),0)
   NON_MATCHING := 1
 endif
@@ -140,6 +161,7 @@ ifeq ($(filter clean distclean,$(MAKECMDGOALS)),)
   else
     $(info IPL:            Nintendo IPL3)
   endif
+  $(info Build type:     $(RELEASE))
   $(info =======================)
 endif
 
@@ -306,7 +328,7 @@ endif
 
 # C compiler options
 CFLAGS = -G 0 $(TARGET_CFLAGS) $(DEF_INC_CFLAGS) $(foreach i,$(INCLUDE_DIRS),--embed-dir=$(i))
-CFLAGS += -std=gnu23 -fno-inline-functions -Wno-unused-variable -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra
+CFLAGS += -std=gnu23 -fno-inline -Wno-unused-variable -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-unsafe-math-optimizations -fno-stack-protector -fno-common -fno-zero-initialized-in-bss -fno-PIC -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra
 CFLAGS += -Wno-missing-braces -Wno-maybe-uninitialized
 
 ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))

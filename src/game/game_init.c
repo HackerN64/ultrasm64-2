@@ -1,5 +1,7 @@
 #include <ultra64.h>
 
+#include "cfg/benchmark.h"
+
 #include "sm64.h"
 #include "gfx_dimensions.h"
 #include "audio/external.h"
@@ -19,6 +21,8 @@
 #include "segment2.h"
 #include "segment_symbols.h"
 #include "rumble_init.h"
+
+#include "benchmark.h"
 
 // First 3 controller slots
 struct Controller gControllers[3];
@@ -525,15 +529,23 @@ void run_demo_inputs(void) {
  */
 void read_controller_inputs(void) {
     s32 i;
-
+#ifndef CFG_BENCHMARK
     // If any controllers are plugged in, update the controller information.
     if (gControllerBits) {
         osRecvMesg(&gSIEventMesgQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
         osContGetReadData(&gControllerPads[0]);
-#if ENABLE_RUMBLE
+    #if ENABLE_RUMBLE
         release_rumble_pak_control();
-#endif
+    #endif
     }
+#else
+    osRecvMesg(&gSIEventMesgQueue, &gMainReceivedMesg, OS_MESG_BLOCK);
+    replay_contpad(&gControllerPads[0]);
+    #if ENABLE_RUMBLE
+        release_rumble_pak_control();
+    #endif
+#endif
+
     run_demo_inputs();
 
     for (i = 0; i < 2; i++) {
@@ -579,10 +591,15 @@ void init_controllers(void) {
 
     // Set controller 1 to point to the set of status/pads for input 1 and
     // init the controllers.
+#ifndef CFG_BENCHMARK
     gControllers[0].statusData = &gControllerStatuses[0];
     gControllers[0].controllerData = &gControllerPads[0];
     osContInit(&gSIEventMesgQueue, &gControllerBits, &gControllerStatuses[0]);
-
+#else
+    gControllers[0].statusData = &gControllerStatuses[0];
+    gControllers[0].controllerData = &gControllerPads[0];
+    gControllerBits = REPLAY_CONTPAD_BITS;
+#endif
     // Strangely enough, the EEPROM probe for save data is done in this function.
     // Save Pak detection?
     gEepromProbe = osEepromProbe(&gSIEventMesgQueue);

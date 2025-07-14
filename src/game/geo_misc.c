@@ -1,5 +1,7 @@
 #include <PR/ultratypes.h>
 
+#include "cfg/benchmark.h"
+
 #include "sm64.h"
 #include "geo_misc.h"
 
@@ -14,6 +16,7 @@
 #include "init/memory.h"
 #include "object_list_processor.h"
 #include "rendering_graph_node.h"
+#include "benchmark.h"
 #include "save_file.h"
 #include "segment2.h"
 
@@ -198,6 +201,12 @@ Gfx *geo_exec_cake_end_screen(s32 callContext, struct GraphNode *node, UNUSED f3
     struct GraphNodeGenerated *generatedNode = (struct GraphNodeGenerated *) node;
     Gfx *displayList = NULL;
     Gfx *displayListHead = NULL;
+
+#ifdef CFG_BENCHMARK
+    if (callContext == GEO_CONTEXT_AREA_LOAD) {
+        replay_print_stats();
+    }
+#endif
 
     if (callContext == GEO_CONTEXT_RENDER) {
         displayList = alloc_display_list(3 * sizeof(*displayList));
