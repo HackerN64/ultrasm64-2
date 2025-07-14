@@ -5,9 +5,6 @@ include util.mk
 # Default target
 default: all
 
-# Preprocessor definitions
-DEFINES :=
-
 # Use Libdragon IPL3
 # WARNING: This CAN and WILL break certain (most) emulators.
 # Use if you care about console or ares boot times.
@@ -26,6 +23,27 @@ RELEASE ?= debug
 # This setting is also in include/cfg/benchmark.h, but provided here as well for automation purposes.
 
 BENCHMARK ?= 0
+
+# VERSION - selects the version of the game to build
+#   jp - builds the 1996 Japanese version
+#   us - builds the 1996 North American version
+#   eu - builds the 1997 PAL version
+#   sh - builds the 1997 Japanese Shindou version, with rumble pak support
+#   cn - builds the 2003 Chinese iQue version
+
+VERSION ?= us
+
+# GRUCODE - selects which RSP microcode to use.
+#   f3d_old - default for JP and US versions
+#   f3d_new - default for EU and Shindou versions
+#   f3dex   -
+#   f3dex2  -
+#   f3dzex  - newer version of the f3dex2 microcode used in Animal Crossing
+
+GRUCODE   ?= f3dex
+
+# Preprocessor definitions
+DEFINES :=
 
 ifeq ($(BENCHMARK), 1)
 	DEFINES += CFG_BENCHMARK=1
@@ -60,47 +78,28 @@ TARGET_N64 ?= 1
 COMPILER ?= gcc
 $(eval $(call validate-option,COMPILER, gcc))
 
-
-# VERSION - selects the version of the game to build
-#   jp - builds the 1996 Japanese version
-#   us - builds the 1996 North American version
-#   eu - builds the 1997 PAL version
-#   sh - builds the 1997 Japanese Shindou version, with rumble pak support
-#   cn - builds the 2003 Chinese iQue version
-VERSION ?= us
 $(eval $(call validate-option,VERSION,jp us eu sh cn))
 
 ifeq      ($(VERSION),jp)
   DEFINES   += VERSION_JP=1
-  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/us_jp
 else ifeq ($(VERSION),us)
   DEFINES   += VERSION_US=1
-  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/us_jp
 else ifeq ($(VERSION),eu)
   DEFINES   += VERSION_EU=1
-  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/eu
 else ifeq ($(VERSION),sh)
   DEFINES   += VERSION_SH=1
-  GRUCODE   ?= f3dex
   AUDIO_SRC_DIR  ?= src/audio/sh
 else ifeq ($(VERSION),cn)
   DEFINES   += VERSION_CN=1
-  GRUCODE   ?= f3dex
+
   AUDIO_SRC_DIR  ?= src/audio/sh
 endif
 
 TARGET := sm64.$(VERSION)
 
-
-# GRUCODE - selects which RSP microcode to use.
-#   f3d_old - default for JP and US versions
-#   f3d_new - default for EU and Shindou versions
-#   f3dex   -
-#   f3dex2  -
-#   f3dzex  - newer, experimental microcode used in Animal Crossing
 $(eval $(call validate-option,GRUCODE,f3d_old f3dex f3dex2 f3d_new f3dzex))
 
 ifeq      ($(GRUCODE),f3d_old)
