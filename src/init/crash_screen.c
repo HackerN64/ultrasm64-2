@@ -2,6 +2,12 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "cfg/crash.h"
+
+#include "main.h"
+#include "game/game_init.h"
+#include "reboot.h"
+
 #include "sm64.h"
 
 #include "PR/os_internal.h"
@@ -296,11 +302,12 @@ void draw_crash_screen(OSThread *thread) {
     n64_printf("\n");
     crash_screen_print_float_reg(30, 220, 30, &tc->fp30.f.f_even);
     n64_printf("\n");
-    n64_printf("==============================================\n");
+    n64_printf("=============================================\n");
     osViBlack(FALSE);
     crash_screen_sleep(2500);
     if (assertMsg != NULL) {
         crash_screen_draw_rect(25, 45, 270, 185);
+        n64_printf(assertMsg);
         crash_screen_print(30, 50, assertMsg);
     }
     play_music(SEQ_PLAYER_LEVEL, SEQ_LEVEL_BOSS_KOOPA, 0);
@@ -331,6 +338,11 @@ void thread2_crash_screen(UNUSED void *arg) {
         thread = get_crashed_thread();
     } while (thread == NULL);
 
+#ifdef CFG_CRASH_REBOOT
+    reboot(osRomType, osTvType, osResetType, 0x3F);
+    __builtin_unreachable();
+#endif
+
     if (thread->id == 5 || thread->id == 6) { // only care about this if game or rumble crashes
         gCrashScreen.thread.priority = 15;
         sound_reset(0);
@@ -344,7 +356,17 @@ void thread2_crash_screen(UNUSED void *arg) {
     osWritebackDCacheAll();
     draw_crash_screen(thread);
 
-    for (;;) {
+    while (TRUE) {
+        if (gControllerBits) {
+#if ENABLE_RUMBLE
+            block_until_rumble_pak_free();
+#endif
+            osContStartReadData(&gSIEventMesgQueue);
+        }
+        read_controller_inputs(2);
+        if (gPlayer1Controller->buttonPressed) {
+            reboot(osRomType, osTvType, osResetType, 0x3F);
+        }
     }
 }
 
@@ -358,7 +380,7 @@ void crash_screen_init(void) {
     gCrashScreen.width = SCREEN_WIDTH;
     gCrashScreen.height = 0x10;
     osCreateMesgQueue(&gCrashScreen.mesgQueue, &gCrashScreen.mesg, 1);
-    osCreateThread(&gCrashScreen.thread, 2, thread2_crash_screen, NULL,
+    osCreateThread(&gCrashScreen.thread, THREAD2_FAULT, thread2_crash_screen, NULL,
                    (u8 *) gCrashScreen.stack + sizeof(gCrashScreen.stack), OS_PRIORITY_RMON);
     osStartThread(&gCrashScreen.thread);
 }

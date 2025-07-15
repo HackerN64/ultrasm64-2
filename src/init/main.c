@@ -340,10 +340,10 @@ void thread3_main(UNUSED void *arg) {
 
     crash_screen_init();
 
-    create_thread(&gSoundThread, 4, thread4_sound, NULL, gThread4Stack + 0x2000, 20);
+    create_thread(&gSoundThread, THREAD4_SFX, thread4_sound, NULL, gThread4Stack + 0x2000, 20);
     osStartThread(&gSoundThread);
 
-    create_thread(&gGameLoopThread, 5, thread5_game_loop, NULL, gThread5Stack + 0x2000, 10);
+    create_thread(&gGameLoopThread, THREAD5_GAME, thread5_game_loop, NULL, gThread5Stack + 0x2000, 10);
     osStartThread(&gGameLoopThread);
 
     while (TRUE) {
@@ -446,7 +446,7 @@ void thread1_idle(UNUSED void *arg) {
     osViSetSpecialFeatures(OS_VI_DITHER_FILTER_ON);
     osViSetSpecialFeatures(OS_VI_GAMMA_OFF);
     osCreatePiManager(OS_PRIORITY_PIMGR, &gPIMesgQueue, gPIMesgBuf, ARRAY_COUNT(gPIMesgBuf));
-    create_thread(&gMainThread, 3, thread3_main, NULL, gThread3Stack + 0x2000, 100);
+    create_thread(&gMainThread, THREAD3_MAIN, thread3_main, NULL, gThread3Stack + 0x2000, 100);
     if (D_8032C650 == 0) {
         osStartThread(&gMainThread);
     }
@@ -463,6 +463,6 @@ void main_func(void) {
 
     osInitialize();
     stub_main_1();
-    create_thread(&gIdleThread, 1, thread1_idle, NULL, gIdleThreadStack + 0x800, 100);
+    create_thread(&gIdleThread, THREAD1_IDLE, thread1_idle, NULL, gIdleThreadStack + 0x800, 100);
     osStartThread(&gIdleThread);
 }

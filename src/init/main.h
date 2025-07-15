@@ -3,6 +3,16 @@
 
 #include "config.h"
 
+enum {
+    THREAD0_NONE,
+    THREAD1_IDLE,
+    THREAD2_FAULT,
+    THREAD3_MAIN,
+    THREAD4_SFX,
+    THREAD5_GAME,
+    THREAD6_RUMBLE
+};
+
 extern OSThread D_80339210;
 extern OSThread gIdleThread;
 extern OSThread gMainThread;

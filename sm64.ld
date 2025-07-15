@@ -47,6 +47,7 @@ SECTIONS
     {
         BUILD_DIR/asm/entry.o(.text);
         BUILD_DIR/asm/decompress.o(.text*);
+        BUILD_DIR/asm/reboot.o(.text);
         BUILD_DIR/src/init/dma_async.o(.text);
         BUILD_DIR/src/init*.o(.text);
         AUDIO_DIR*.o(.text);
@@ -58,6 +59,7 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.data*);
         BUILD_DIR/asm/decompress.o(.data*);
+        BUILD_DIR/asm/reboot.o(.data*);
         BUILD_DIR/src/init/dma_async.o(.data);
         BUILD_DIR/src/init*.o(.data*);
         AUDIO_DIR*.o(.data*);
@@ -69,6 +71,7 @@ SECTIONS
 
         BUILD_DIR/asm/entry.o(.rodata*);
         BUILD_DIR/asm/decompress.o(.rodata*);
+        BUILD_DIR/asm/reboot.o(.rodata*);
         BUILD_DIR/src/init/dma_async.o(.rodata);
         BUILD_DIR/src/init*.o(.rodata*);
         AUDIO_DIR*.o(.rodata*);
