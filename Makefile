@@ -14,7 +14,6 @@ LIBDRAGON_IPL3 ?= 0
 # Build types
 # debug   - Debug build
 # general - General release build
-# final   - Final release build with no crash screen, game will reset upon exception.
 
 RELEASE ?= debug
 
@@ -55,8 +54,6 @@ ifeq ($(RELEASE), debug)
   DEFINES +=  _DEBUG=1
 else ifeq ($(RELEASE), general)
   OPT_FLAGS := -Os -ggdb3
-else ifeq ($(RELEASE), final)
-  OPT_FLAGS := -Os
 else
   $(error Invalid build release setting.)
 endif
