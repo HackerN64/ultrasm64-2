@@ -6,8 +6,6 @@
 #include "PRinternal/macros.h"
 #include "stdarg.h"
 
-#ifndef _FINALROM
-
 void __osSyncVPrintf(const char* fmt, va_list args);
 
 static u32 errorLogData[19] ALIGNED(0x8);
@@ -23,6 +21,8 @@ static void __commonErrorHandler(s16 code, s16 numArgs, ...);
 OSErrorHandler __osCommonHandler = __commonErrorHandler;
 
 char NULSTR[] = "";
+extern char *assertMsg;
+static char errorFmt[256];
 
 const char* __os_error_message[] = {
     NULSTR,
@@ -183,11 +183,13 @@ void __commonErrorHandler(s16 code, s16 numArgs, ...) {
     fmt = __os_error_message[code];
     va_start(argPtr, numArgs);
 
+    sprintf(errorFmt, fmt, argPtr);
+    assertMsg = &errorFmt[0];
+
     osSyncPrintf("0x%08X (%04d):", osGetCount(), code);
     __osSyncVPrintf(fmt, argPtr);
     osSyncPrintf("\n");
 
     va_end(argPtr);
+    __builtin_trap();
 }
-
-#endif

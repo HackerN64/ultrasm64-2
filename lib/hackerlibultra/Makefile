@@ -44,7 +44,7 @@ WARNINGS += -Wno-int-conversion -Wno-incompatible-pointer-types -Wno-implicit-fu
 CFLAGS := -std=gnu23 -G 0 -c -fno-inline -nostdinc -march=vr4300 -mfix4300 -mabi=32 -mno-abicalls -mdivide-breaks -fno-PIC -fno-common -ffreestanding -fbuiltin -fno-builtin-sinf -fno-builtin-cosf -funsigned-char $(WARNINGS)
 CFLAGS += -fno-strict-aliasing # TODO: Try adjusting code to remove this
 ASFLAGS := -w -nostdinc -c -G 0 -march=vr4300 -mabi=32 -mgp32 -mfp32 -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
-CPPFLAGS = -DMODERN_CC -D_MIPS_SZLONG=32 -D__USE_ISOC99 $(GBIDEFINE) $(VERSION_DEFINE) $(DEBUGFLAG)
+CPPFLAGS = -DMODERN_CC -D_MIPS_SZLONG=32 -D__USE_ISOC99 $(GBIDEFINE) $(VERSION_DEFINE) $(DEBUGFLAG) -D_DEBUG
 IINC = -I . -I $(WORKING_DIR)/include -I $(WORKING_DIR)/include/compiler/modern_gcc -I $(WORKING_DIR)/include/PR
 MIPS_VERSION := -mips3
 ASOPTFLAGS :=
